@@ -19,11 +19,12 @@ struct firstbili: View {
     @State private var showSearchView = false // 状态提升到这里
     @State private var showVideoView = false
     @Binding var hideTabBar: Bool
+    @State private var selectedVideo: Video? = nil
     var body: some View {
         NavigationStack { // 添加导航容器
             ZStack {
                 Showscroll(
-                    columns: $columns,
+                    selectedVideo: $selectedVideo, columns: $columns,
                     columns2: $columns2,
                     hideTabBar: $hideTabBar,
                     showSearchView: $showSearchView, showVideoView: $showVideoView
@@ -35,9 +36,9 @@ struct firstbili: View {
                 searchview(hideTabBar: $hideTabBar)
                     .navigationBarBackButtonHidden(true) // 隐藏返回按钮
             }
-            .navigationDestination(isPresented: $showVideoView){
-                VideoPlayerView(hideTabBar: $hideTabBar)
-                    .navigationBarBackButtonHidden(true) // 隐藏返回按钮
+            .navigationDestination(item: $selectedVideo) { video in
+                VideoPlayerView(hideTabBar: $hideTabBar, video: video)
+                    .navigationBarBackButtonHidden(true)
             }
             .onAppear {
                      hideTabBar = false // 确保返回首页时显示标签栏
@@ -62,6 +63,8 @@ struct firstbili: View {
 
 
 struct Showscroll: View {
+    @State private var videos: [Video] = []
+    @Binding var selectedVideo : Video?
     let choosetitle = ["直播", "推荐", "热门", "动画", "影视", "新征程"]
     let items = [
         "bv1",
@@ -130,78 +133,40 @@ struct Showscroll: View {
             }
             .padding(.horizontal)
             
+            
+            
             LazyVGrid(columns: columns, pinnedViews: [.sectionHeaders]) {
-                Section(header : headerView) {
+                Section(header:headerView){
                     SimpleAutoScrollView()
                     //网格嵌套
                     LazyVGrid(columns: columns2, pinnedViews: []) {
-                        ForEach(0..<items.count,id: \.self){index in
-                            Button(action:{
-                                showVideoView=true
-                                hideTabBar = true // 点击视频时隐藏标签栏
-                            }){
-                                Image(items[index])
-                                    .resizable()
-                                    .frame(width: 180,height: 200)
-                                    .cornerRadius(15)
+                        ForEach(videos, id: \.id) { video in
+                            Button(action: {
+                                selectedVideo = video
+                                hideTabBar = true
+                            }) {
+                                if let data = video.coverimage, let uiImage = UIImage(data: data) {
+                                    Image(uiImage: uiImage)
+                                        .resizable()
+                                        .frame(width: 180, height: 200)
+                                        .cornerRadius(15)
+                                } else {
+                                    Color.gray.frame(width: 180, height: 200)
+                                }
                             }
-                            
                         }
-                        
                     }
+                }
+                .onAppear {
+                    VideoDataManager.shared.addSampleVideosIfNeeded()  // 添加示例数据
+                    videos = VideoDataManager.shared.getAllVideos()    // 读取所有视频
                 }
             }
             .background(Color(#colorLiteral(red: 0.8802281022, green: 0.8802281022, blue: 0.8802281022, alpha: 1)).opacity(0.3))
-            
         }
     }
     
-    // 横向滚动栏目（独立组件）
-    struct SimpleAutoScrollView: View {
-        let items = [
-            "roll1",
-            "roll2",
-            "roll3"
-        ]
-        @State private var currentIndex = 0
-        @State private var timer: Timer?
-        
-        var body: some View {
-            VStack {
-                // 1. 可滚动的页面
-                TabView(selection: $currentIndex) {
-                    ForEach(0..<items.count, id: \.self) { name in
-                        Button(action :{
-                            //
-                        }){
-                            Image(items[name])//循环遍历必须是数字才能实现滚动
-                                .resizable()
-                                    .scaledToFill()
-                                    .frame(width: 350, height: 200)
-                                    .cornerRadius(15)
-                        }
-                    }
-                }
-                .tabViewStyle(.page(indexDisplayMode: .never))
-                .frame(height: 210)
-            }
-            .onAppear {startTimer()}
-            .onDisappear {stopTimer()}
-        }
-        
-        func startTimer() {
-            timer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { _ in
-                withAnimation {
-                    currentIndex = (currentIndex + 1) % items.count
-                }
-            }
-        }
-        
-        func stopTimer() {
-            timer?.invalidate()
-        }
-    }
-    
+
     // 标题视图（保持不变）
     var headerView: some View {
        
@@ -229,5 +194,51 @@ struct Showscroll: View {
             }
         }
         .background(Color.white)
+    }
+}
+
+// 横向滚动栏目（独立组件）
+struct SimpleAutoScrollView: View {
+    let items = [
+        "roll1",
+        "roll2",
+        "roll3"
+    ]
+    @State private var currentIndex = 0
+    @State private var timer: Timer?
+    
+    var body: some View {
+        VStack {
+            // 1. 可滚动的页面
+            TabView(selection: $currentIndex) {
+                ForEach(0..<items.count, id: \.self) { name in
+                    Button(action :{
+                        //
+                    }){
+                        Image(items[name])//循环遍历必须是数字才能实现滚动
+                            .resizable()
+                                .scaledToFill()
+                                .frame(width: 350, height: 200)
+                                .cornerRadius(15)
+                    }
+                }
+            }
+            .tabViewStyle(.page(indexDisplayMode: .never))
+            .frame(height: 210)
+        }
+        .onAppear {startTimer()}
+        .onDisappear {stopTimer()}
+    }
+    
+    func startTimer() {
+        timer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { _ in
+            withAnimation {
+                currentIndex = (currentIndex + 1) % items.count
+            }
+        }
+    }
+    
+    func stopTimer() {
+        timer?.invalidate()
     }
 }
