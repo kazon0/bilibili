@@ -61,23 +61,26 @@ class VideoDataManager {
         deleteAllVideos()
         let videos = getAllVideos()
         if videos.isEmpty {
-            let fileNames = ["1.mp4", "2.mp4", "3.mp4"]
+            let fileURLs = [
+                "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+                "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+                "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4"
+            ]
             let titles = ["测试视频1", "测试视频2", "测试视频3"]
-            let descriptions = ["猫草丛中", "猫树下", "野餐与花"]
+            let descriptions = ["大兔子", "大象的梦", "辛特尔"]
             let covers = ["bv1", "bv2", "bv3"]
 
-            for i in 0..<fileNames.count {
-                let fileName = fileNames[i]
+            for i in 0..<fileURLs.count {
                 let imageData = UIImage(named: covers[i])?.jpegData(compressionQuality: 0.8)
 
                 addVideo(
                     title: titles[i],
                     description: descriptions[i],
-                    filePath: fileName,  // 只存文件名，不存路径
+                    filePath: fileURLs[i],  // 保存的是完整 URL
                     coverImage: imageData
                 )
             }
-            print("初始视频添加完成")
+            print("初始网络视频添加完成")
         } else {
             print("数据库已有视频，无需添加")
         }

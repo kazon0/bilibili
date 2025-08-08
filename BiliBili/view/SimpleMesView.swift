@@ -11,11 +11,11 @@ import SwiftUI
         @State private var isunLiked = false
         @State private var isCollected = false
         @State private var isCoined = false
+       
+        let video: Video
         
-        let videoTitle = "长期处于心理应激的人，一眼就能看穿"
         let upName = "远叔"
         let upFans = "12.6万粉丝"
-        let videoDescription = "无"
         let viewsCount = "25.9万"
         let danmuCount = "799"
         let publishTime = "2025-03-24 11:37 17人正在看"
@@ -53,7 +53,7 @@ import SwiftUI
             .padding(.vertical, 8)
             // 视频信息区域
             VStack(alignment: .leading, spacing: 12) {
-                Text(videoTitle)
+                Text(video.title ?? "无标题")
                     .font(.system(size: 18, weight: .medium))
                     .lineLimit(2)
                 

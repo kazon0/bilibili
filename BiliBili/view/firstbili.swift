@@ -7,45 +7,54 @@
 
 import SwiftUI
 
+
 struct firstbili: View {
-    @State  var columns:[GridItem]=[
-        GridItem(.flexible(), spacing: nil, alignment: nil)
-    ]
-    
-    @State var columns2:[GridItem] = [
-        GridItem(.flexible(), spacing: nil, alignment: nil),
-        GridItem(.flexible(), spacing: nil, alignment: nil)
-    ]
-    @State private var showSearchView = false // 状态提升到这里
+    @State var columns: [GridItem] = [GridItem(.flexible())]
+    @State var columns2: [GridItem] = [GridItem(.flexible()), GridItem(.flexible())]
+    @State private var showSearchView = false
     @State private var showVideoView = false
     @Binding var hideTabBar: Bool
     @State private var selectedVideo: Video? = nil
+    @State private var navigateToVideo = false // 控制跳转
+
     var body: some View {
-        NavigationStack { // 添加导航容器
+        NavigationStack {
             ZStack {
                 Showscroll(
-                    selectedVideo: $selectedVideo, columns: $columns,
+                    selectedVideo: $selectedVideo,
+                    columns: $columns,
                     columns2: $columns2,
                     hideTabBar: $hideTabBar,
-                    showSearchView: $showSearchView, showVideoView: $showVideoView
+                    navigateToVideo: $navigateToVideo,
+                    showSearchView: $showSearchView,
+                    showVideoView: $showVideoView
                 )
             }
-            .navigationBarHidden(true) // 隐藏主界面导航栏
+            .navigationBarHidden(true)
             .padding(.horizontal)
+            
+            // 跳转到搜索页
             .navigationDestination(isPresented: $showSearchView) {
                 searchview(hideTabBar: $hideTabBar)
-                    .navigationBarBackButtonHidden(true) // 隐藏返回按钮
-            }
-            .navigationDestination(item: $selectedVideo) { video in
-                VideoPlayerView(hideTabBar: $hideTabBar, video: video)
                     .navigationBarBackButtonHidden(true)
             }
+
+            .navigationDestination(isPresented: $navigateToVideo) {
+                if let video = selectedVideo {
+                    VideoPlayerView(hideTabBar: $hideTabBar, video: video)
+                        .navigationBarBackButtonHidden(true)
+                } else {
+                    Text("未找到视频")
+                }
+            }
             .onAppear {
-                     hideTabBar = false // 确保返回首页时显示标签栏
-                 }
+                hideTabBar = false
+            }
+
         }
     }
 }
+
 
 #Preview {
     // 创建一个本地状态用于预览
@@ -79,6 +88,7 @@ struct Showscroll: View {
     @Binding var columns: [GridItem]
     @Binding var columns2: [GridItem]
     @Binding var hideTabBar: Bool
+    @Binding var navigateToVideo: Bool
     
     // 搜索相关状态
     @State private var searchText = ""
@@ -144,6 +154,7 @@ struct Showscroll: View {
                             Button(action: {
                                 selectedVideo = video
                                 hideTabBar = true
+                                navigateToVideo = true
                             }) {
                                 if let data = video.coverimage, let uiImage = UIImage(data: data) {
                                     Image(uiImage: uiImage)

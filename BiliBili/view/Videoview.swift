@@ -9,7 +9,6 @@
 
 import SwiftUI
 
-
 struct VideoPlayerView: View {
     //用环境变量控制导航
     @Environment(\.dismiss) private var dismiss
@@ -24,50 +23,34 @@ struct VideoPlayerView: View {
     @State private var offset = CGSize.zero
     @State var guesture :String = ""
     
+    @StateObject private var playerWrapper = PlayerWrapper()
+
+    
     var body: some View {
         ScrollView(.vertical, showsIndicators: false){
+            
             VStack(alignment: .leading, spacing: 0) {
                 // 视频封面/播放区域
                 if guesture != "up"{
-                ZStack(alignment: .bottom) {
                     ZStack(alignment: .bottom){
+                        
                         ZStack(alignment: .topLeading){
-//                            Image("roll2")
-//                                .resizable()
-//                                .aspectRatio(16/9, contentMode: .fill)
-//                                .frame(width: UIScreen.main.bounds.width)
-//                                .clipped()
+
                             Group {
                                 if let filePath = video.filepath {
-                                    let nsFilePath = NSString(string: filePath)
-                                    let resourceName = nsFilePath.deletingPathExtension
-                                    let resourceExtension = nsFilePath.pathExtension
-
-                                    Text("视频路径：\(filePath)")
-                                    Text("Bundle路径：\(Bundle.main.bundlePath)")
-                                    Text("资源名：\(resourceName)")
-                                    Text("资源扩展名：\(resourceExtension)")
-
-                                    if let url = Bundle.main.url(forResource: resourceName, withExtension: resourceExtension) {
-                                        SimpleVideoPlayerView(videoURL: url)
-                                            .frame(height: UIScreen.main.bounds.width * 9 / 16)
-                                    } else {
-                                        Text("无效的视频路径，找不到资源")
+                                        VStack {
+                                            if let url = URL(string: filePath), url.scheme?.hasPrefix("http") == true {
+                                                SimpleVideoPlayerView(playerWrapper: playerWrapper, videoURL: url)
+                                                        .frame(height: UIScreen.main.bounds.width * 9 / 16)
+                                            }
+                                        }
+                                } else {
+                                        Text("无效的视频路径，filepath 为空")
                                             .frame(height: UIScreen.main.bounds.width * 9 / 16)
                                             .background(Color.gray)
-                                            .onAppear {
-                                                print("无法找到视频资源：\(resourceName).\(resourceExtension)")
-                                            }
-                                    }
-                                } else {
-                                    Text("无效的视频路径，filepath 为空")
-                                        .frame(height: UIScreen.main.bounds.width * 9 / 16)
-                                        .background(Color.gray)
-                                        .onAppear {
-                                            print("video.filepath 为 nil")
-                                        }
                                 }
                             }
+
                             // 返回按钮
                             Button(action: {
                                 dismiss()
@@ -78,55 +61,8 @@ struct VideoPlayerView: View {
                             .padding()
                             
                         }
-                            
-                            // 播放控制条
-                            HStack {
-                                Image(systemName: "play.fill")
-                                    .foregroundColor(.white)
-                                    .font(.system(size: 20))
-                                
-                                // 进度条（使用 ZStack 叠加背景和进度）
-                                ZStack(alignment: .leading) {
-                                    Capsule()
-                                        .fill(
-                                            LinearGradient(
-                                                colors: [Color(#colorLiteral(red: 0.7772451043, green: 0.7772451043, blue: 0.7772451043, alpha: 0.8470588326)),
-                                                         Color(#colorLiteral(red: 0.8718039989, green: 0.8718039989, blue: 0.8718039989, alpha: 0.8470588326))],
-                                                startPoint: .top,
-                                                endPoint: .bottom
-                                            )
-                                        )
-                                        .frame(height: 4) // 高度与 B站一致
-                                    
-                                    // 进度指示：粉色（B站主题色）
-                                    Capsule()
-                                        .fill(Color(#colorLiteral(red: 1, green: 0.35, blue: 0.68, alpha: 1))) // B站粉
-                                        .frame(width: UIScreen.main.bounds.width * 0.3, height: 4) // 30% 进度示例
-                                }
-                                .frame(height: 4) // 控制条总高度
-                                
-                                Text("1:24/03:29")
-                                    .foregroundColor(.white)
-                                    .font(.system(size: 12))
-                                
-                                Spacer()
-                                Image(systemName: "viewfinder")
-                                    .foregroundColor(.white)
-                                    .font(.system(size: 20))
-                                Image(systemName: "arrow.up.left.and.arrow.down.right")
-                                    .foregroundColor(.white)
-                                    .font(.system(size: 20))
-                            }
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 8)
-                            .background(LinearGradient(
-                                gradient: Gradient(colors: [Color(#colorLiteral(red: 0.2179805934, green: 0.2179805934, blue: 0.2179805934, alpha: 0.8470588326)), Color(#colorLiteral(red: 0.2179805934, green: 0.2179805934, blue: 0.2179805934, alpha: 0.8470588326)), Color(#colorLiteral(red: 0.2179805934, green: 0.2179805934, blue: 0.2179805934, alpha: 0.8470588326)).opacity(0.3)]),
-                                startPoint: .bottom,
-                                endPoint: .top
-                            ))
+                        ProgressbarView(playerWrapper: playerWrapper)
                         }
-                    
-                }
             }
            
                     LazyVGrid(columns: columns, pinnedViews: [.sectionHeaders]) {
@@ -135,7 +71,7 @@ struct VideoPlayerView: View {
                                 TotalCommentView()
                             }
                             else if selectionTitle == "简介"{
-                                SimpleMesView()
+                                SimpleMesView(video:video)
                             }
                         }
                     }
@@ -410,9 +346,7 @@ struct SplitCapsuleButton: View {
                     .background(Color(#colorLiteral(red: 0.9447798133, green: 0.9447798133, blue: 0.9447798133, alpha: 1)))
                     
             }
-            
             Divider()
-            
             Button(action: rightAction) {
                 Text("弹")
                     .font(.system(size: 16, weight: .medium))
