@@ -92,24 +92,55 @@ class ApiService {
         }.resume()
     }
 
-    // 获取视频列表
-    func getVideos(completion: @escaping (Result<[[String: Any]], Error>) -> Void) {
-        guard let url = URL(string: "\(baseURL)/videos") else { return }
+    func getVideosDecodable(page: Int = 1,
+                            pageSize: Int = 20,
+                            token: String? = nil,
+                            completion: @escaping (Result<[Videos], Error>) -> Void) {
         
-        URLSession.shared.dataTask(with: url) { data, response, error in
-            if let error = error {
-                completion(.failure(error))
-                return
-            }
-            
-            guard let data = data else { return }
-            do {
-                // 返回一个数组
-                let json = try JSONSerialization.jsonObject(with: data) as? [[String: Any]] ?? []
-                completion(.success(json))
-            } catch {
-                completion(.failure(error))
+        var components = URLComponents(string: "\(baseURL)/user/videos")!
+        components.queryItems = [
+            URLQueryItem(name: "page", value: "\(page)"),
+            URLQueryItem(name: "pagesize", value: "\(pageSize)")
+        ]
+        
+        guard let url = components.url else { return }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        
+        if let token = token {
+            request.setValue(token, forHTTPHeaderField: "Authorization")
+        }
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            DispatchQueue.main.async {
+                if let error = error {
+                    completion(.failure(error))
+                    return
+                }
+                guard let data = data else {
+                    completion(.failure(NSError(domain: "No data", code: -1)))
+                    return
+                }
+                
+                // 打印原始 JSON 字符串
+                if let jsonString = String(data: data, encoding: .utf8) {
+                    print("返回 JSON: \(jsonString)")
+                }
+                
+                do {
+                    let response = try JSONDecoder().decode(VideoResponses.self, from: data)
+                    if response.code == 0 {
+                        completion(.success(response.data))
+                    } else {
+                        completion(.failure(NSError(domain: response.msg, code: response.code)))
+                    }
+                } catch {
+                    completion(.failure(error))
+                }
             }
         }.resume()
+
     }
+
 }

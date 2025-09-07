@@ -14,7 +14,7 @@ struct VideoPlayerView: View {
     @Environment(\.dismiss) private var dismiss
     @Binding var hideTabBar: Bool
     
-    let video: Video
+    let video: Videos
 
     let choosetitle = ["简介", "评论"]
     @State var selectionTitle :String = "简介"
@@ -37,17 +37,21 @@ struct VideoPlayerView: View {
                         ZStack(alignment: .topLeading){
 
                             Group {
-                                if let filePath = video.filepath {
-                                        VStack {
-                                            if let url = URL(string: filePath), url.scheme?.hasPrefix("http") == true {
-                                                SimpleVideoPlayerView(playerWrapper: playerWrapper, videoURL: url)
-                                                        .frame(height: UIScreen.main.bounds.width * 9 / 16)
-                                            }
+                                if !video.videoUrl.isEmpty {
+                                    VStack {
+                                        if let url = URL(string: video.videoUrl), url.scheme?.hasPrefix("http") == true {
+                                            SimpleVideoPlayerView(playerWrapper: playerWrapper, videoURL: url)
+                                                .frame(height: UIScreen.main.bounds.width * 9 / 16)
+                                        } else {
+                                            Text("无效的视频 URL")
+                                                .frame(height: UIScreen.main.bounds.width * 9 / 16)
+                                                .background(Color.gray)
                                         }
+                                    }
                                 } else {
-                                        Text("无效的视频路径，filepath 为空")
-                                            .frame(height: UIScreen.main.bounds.width * 9 / 16)
-                                            .background(Color.gray)
+                                    Text("视频路径为空")
+                                        .frame(height: UIScreen.main.bounds.width * 9 / 16)
+                                        .background(Color.gray)
                                 }
                             }
 

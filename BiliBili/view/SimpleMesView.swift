@@ -7,25 +7,58 @@
 import SwiftUI
 
    struct SimpleMesView: View {
-        @State private var isLiked = false
-        @State private var isunLiked = false
-        @State private var isCollected = false
-        @State private var isCoined = false
-       
-        let video: Video
-        
-        let upName = "远叔"
-        let upFans = "12.6万粉丝"
-        let viewsCount = "25.9万"
-        let danmuCount = "799"
-        let publishTime = "2025-03-24 11:37 17人正在看"
+       @State private var isLiked: Bool
+       @State private var isDisliked: Bool
+       @State private var isCollected: Bool
+       @State private var isCoined: Bool
+
+       let video: Videos
+       let upName: String
+       let upFans: String
+       let viewsCount: String
+       let danmuCount: String
+       let publishTime: String
+
+       init(video: Videos) {
+           _isLiked = State(initialValue: video.isLike)
+           _isDisliked = State(initialValue: video.isDislike)
+           _isCollected = State(initialValue: video.isCollect)
+           _isCoined = State(initialValue: video.isCoin)
+           self.video = video
+           self.upName = video.upData.name ?? "未知作者"
+           self.upFans = "\(video.upData.fans ?? 0)粉丝"
+           self.viewsCount = "\(video.upData.videoCount ?? 0)"
+           self.danmuCount = "799"
+           self.publishTime = "2025-03-24 11:37"
+       }
+
         var body: some View {
             // UP主信息区域
             HStack {
-                Image("头像")
-                    .resizable()
-                    .frame(width: 40, height: 40)
-                    .clipShape(Circle())
+                if let avatarURL = URL(string: video.upData.avator ?? "") {
+                    AsyncImage(url: avatarURL) { phase in
+                        switch phase {
+                        case .empty:
+                            ProgressView()
+                                .frame(width: 40, height: 40)
+                        case .success(let image):
+                            image
+                                .resizable()
+                                .frame(width: 40, height: 40)
+                                .clipShape(Circle())
+                        case .failure:
+                            Image(systemName: "person.crop.circle.fill")
+                                .resizable()
+                                .frame(width: 40, height: 40)
+                        @unknown default:
+                            EmptyView()
+                        }
+                    }
+                } else {
+                    Image(systemName: "person.crop.circle.fill")
+                        .resizable()
+                        .frame(width: 40, height: 40)
+                }
                 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(upName)
@@ -53,7 +86,7 @@ import SwiftUI
             .padding(.vertical, 8)
             // 视频信息区域
             VStack(alignment: .leading, spacing: 12) {
-                Text(video.title ?? "无标题")
+                Text(video.title)
                     .font(.system(size: 18, weight: .medium))
                     .lineLimit(2)
                 
@@ -89,7 +122,7 @@ import SwiftUI
                     VStack(spacing: 4) {
                         Button(action: {
                             isLiked.toggle()
-                            isunLiked=false
+                            isDisliked=false
                         }) {
                             Image(systemName: isLiked ? "hand.thumbsup.fill" : "hand.thumbsup")
                                 .font(.system(size: 22))
@@ -102,12 +135,12 @@ import SwiftUI
                     
                     VStack(spacing: 4) {
                         Button(action: {
-                            isunLiked.toggle()
+                            isDisliked.toggle()
                             isLiked=false
                         }) {
-                            Image(systemName: isunLiked ? "hand.thumbsdown.fill" : "hand.thumbsdown")
+                            Image(systemName: isDisliked ? "hand.thumbsdown.fill" : "hand.thumbsdown")
                                 .font(.system(size: 22))
-                                .foregroundColor(isunLiked ? Color(#colorLiteral(red: 1, green: 0.35, blue: 0.68, alpha: 1)) : .gray)
+                                .foregroundColor(isDisliked ? Color(#colorLiteral(red: 1, green: 0.35, blue: 0.68, alpha: 1)) : .gray)
                         }
                         Text("不喜欢")
                             .font(.system(size: 12))

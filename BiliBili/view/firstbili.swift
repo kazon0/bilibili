@@ -14,7 +14,7 @@ struct firstbili: View {
     @State private var showSearchView = false
     @State private var showVideoView = false
     @Binding var hideTabBar: Bool
-    @State private var selectedVideo: Video? = nil
+    @State private var selectedVideo: Videos? = nil
     @State private var navigateToVideo = false // 控制跳转
 
     var body: some View {
@@ -38,7 +38,6 @@ struct firstbili: View {
                 searchview(hideTabBar: $hideTabBar)
                     .navigationBarBackButtonHidden(true)
             }
-
             .navigationDestination(isPresented: $navigateToVideo) {
                 if let video = selectedVideo {
                     VideoPlayerView(hideTabBar: $hideTabBar, video: video)
@@ -72,16 +71,10 @@ struct firstbili: View {
 
 
 struct Showscroll: View {
-    @State private var videos: [Video] = []
-    @Binding var selectedVideo : Video?
+    @State private var videos: [Videos] = []
+    @Binding var selectedVideo : Videos?
     let choosetitle = ["直播", "推荐", "热门", "动画", "影视", "新征程"]
-    let items = [
-        "bv1",
-        "bv2",
-        "bv3",
-        "bv4",
-        "bv5"
-    ]
+    
     @State private var currentIndex = 0
     @State private var timer: Timer?
     @State var selectionTitle :String = "推荐"
@@ -101,6 +94,8 @@ struct Showscroll: View {
     
     //登录状态
     @AppStorage("userToken") private var userToken: String = ""
+    
+    @StateObject private var viewModel = VideoViewModel()
     
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
@@ -155,33 +150,89 @@ struct Showscroll: View {
             .padding(.horizontal)
             
             
-            
             LazyVGrid(columns: columns, pinnedViews: [.sectionHeaders]) {
-                Section(header:headerView){
+                Section(header: headerView) {
                     SimpleAutoScrollView()
-                    //网格嵌套
-                    LazyVGrid(columns: columns2, pinnedViews: []) {
-                        ForEach(videos, id: \.id) { video in
+                    
+                    LazyVGrid(columns: columns2) {
+                        ForEach(viewModel.videos, id: \.id) { video in
                             Button(action: {
                                 selectedVideo = video
                                 hideTabBar = true
                                 navigateToVideo = true
                             }) {
-                                if let data = video.coverimage, let uiImage = UIImage(data: data) {
-                                    Image(uiImage: uiImage)
-                                        .resizable()
-                                        .frame(width: 180, height: 200)
-                                        .cornerRadius(15)
-                                } else {
-                                    Color.gray.frame(width: 180, height: 200)
+                                VStack(spacing: 0) {
+                                    AsyncImage(url: URL(string: video.thumbPhoto)) { phase in
+                                        switch phase {
+                                        case .empty:
+                                            ProgressView()
+                                                .frame(height: 150)
+                                                .frame(maxWidth: .infinity)
+                                        case .success(let image):
+                                            image
+                                                .resizable()
+                                                .scaledToFill()
+                                                .frame(height: 150)
+                                                .frame(maxWidth: .infinity)
+                                                .clipped()
+                                        case .failure:
+                                            Color.gray
+                                                .frame(height: 150)
+                                        @unknown default:
+                                            EmptyView()
+                                        }
+                                    }
+
+                                    // 下半部分：白底标题
+                                    VStack(alignment: .leading) {
+                                        Text(video.title)
+                                            .font(.body)
+                                            .padding(.leading,5)
+                                            .foregroundColor(.primary)
+                                            .lineLimit(2)
+                                            .offset(y:-20)
+                                        if let name = video.upData.name {
+                                            HStack{
+                                                Image("up")
+                                                    .resizable()
+                                                    .scaledToFit()
+                                                    .frame(width:18)
+                                                    .padding(.leading,5)
+                                                Text(name)
+                                                    .font(.caption)
+                                                    .foregroundColor(.gray)
+                                            }
+                                            .offset(y:-10)
+                                          
+                                        } else {
+                                            HStack{
+                                                Image("up")
+                                                    .resizable()
+                                                    .scaledToFit()
+                                                    .frame(width:18)
+                                                    .padding(.leading,5)
+                                                Text("未知作者")
+                                                    .font(.caption)
+                                                    .foregroundColor(.gray)
+                                            }
+                                            .offset(y:-10)
+                                        }
+                                    }
+                                    .padding(.vertical,30)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .background(Color.white)
                                 }
+                                .frame(width: 180, height: 200) // 方形卡片
+                                .cornerRadius(12)
+                                .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+
                             }
+                            .buttonStyle(PlainButtonStyle())
                         }
                     }
-                }
-                .onAppear {
-                    VideoDataManager.shared.addSampleVideosIfNeeded()  // 添加示例数据
-                    videos = VideoDataManager.shared.getAllVideos()    // 读取所有视频
+                    .onAppear {
+                        viewModel.fetchVideos(token: userToken)
+                    }
                 }
             }
             .background(Color(#colorLiteral(red: 0.8802281022, green: 0.8802281022, blue: 0.8802281022, alpha: 1)).opacity(0.3))
