@@ -99,6 +99,9 @@ struct Showscroll: View {
     @State private var isVideoing = false
     @Binding var showVideoView: Bool
     
+    //登录状态
+    @AppStorage("userToken") private var userToken: String = ""
+    
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
             // 1. 用户头像部分（不受网格限制）
@@ -106,10 +109,18 @@ struct Showscroll: View {
                 Button(action:{
                     
                 }){
-                    Image("头像")
-                        .resizable()
-                        .frame(width: 60, height: 60)
-                        .cornerRadius(30)
+                    if userToken.isEmpty {
+                        // 未登录显示默认头像
+                        Image("unlog")
+                            .resizable()
+                            .frame(width: 60, height: 60)
+                            .cornerRadius(30)
+                    }else{
+                        Image("头像")
+                            .resizable()
+                            .frame(width: 60, height: 60)
+                            .cornerRadius(30)
+                    }
                 }
                 Button(action:{
                     showSearchView=true

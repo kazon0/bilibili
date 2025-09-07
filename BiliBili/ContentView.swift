@@ -1,16 +1,13 @@
-import SwiftUI
 
-extension View {
-    var safeAreaTop: CGFloat {
-        UIApplication.shared.connectedScenes
-            .compactMap { $0 as? UIWindowScene }
-            .first?.windows.first?.safeAreaInsets.top ?? 0
-    }
-}
+
+import SwiftUI
 
 struct ContentView: View {
     @State private var selectedTab = 0
     @State private var hideTabBar = false
+    
+    @AppStorage("userToken") private var userToken: String = ""
+    
     var body: some View {
             ZStack(alignment: .bottom) {
                 // 主内容区域
@@ -20,22 +17,17 @@ struct ContentView: View {
                     case 1: subview()
                     case 2: uploadview()
                     case 3: buyview()
-                    case 4: personview()
+                    case 4:
+                        if userToken.isEmpty {
+                            MyPageView()
+                        } else {
+                            personview()
+                        }
                     default: EmptyView()
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 
-                // 顶部雾面遮罩
-                VStack(spacing: 0) {
-                    Rectangle()
-                        .fill(.ultraThinMaterial)
-                        .frame(height: safeAreaTop)
-                        .edgesIgnoringSafeArea(.top)
-                    Spacer()
-                }
-                
-                // 自定义TabBar
                 if !hideTabBar{
                     HStack(spacing: 0) {
                         ForEach(0..<5, id: \.self) { index in
