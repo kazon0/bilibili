@@ -13,8 +13,7 @@ struct VideoPlayerView: View {
     //用环境变量控制导航
     @Environment(\.dismiss) private var dismiss
     @Binding var hideTabBar: Bool
-    
-    let video: Videos
+    @Binding var video: Videos
 
     let choosetitle = ["简介", "评论"]
     @State var selectionTitle :String = "简介"
@@ -24,9 +23,10 @@ struct VideoPlayerView: View {
     @State var guesture :String = ""
     
     @StateObject private var playerWrapper = PlayerWrapper()
-
+    @ObservedObject var viewModel: VideoViewModel
     
     var body: some View {
+
         ScrollView(.vertical, showsIndicators: false){
             
             VStack(alignment: .leading, spacing: 0) {
@@ -37,24 +37,18 @@ struct VideoPlayerView: View {
                         ZStack(alignment: .topLeading){
 
                             Group {
-                                if !video.videoUrl.isEmpty {
-                                    VStack {
-                                        if let url = URL(string: video.videoUrl), url.scheme?.hasPrefix("http") == true {
-                                            SimpleVideoPlayerView(playerWrapper: playerWrapper, videoURL: url)
-                                                .frame(height: UIScreen.main.bounds.width * 9 / 16)
-                                        } else {
-                                            Text("无效的视频 URL")
-                                                .frame(height: UIScreen.main.bounds.width * 9 / 16)
-                                                .background(Color.gray)
-                                        }
+                                VStack {
+                                    if let path = Bundle.main.path(forResource: "video1", ofType: "mp4") {
+                                        let localUrl = URL(fileURLWithPath: path)
+                                        SimpleVideoPlayerView(playerWrapper: playerWrapper, videoURL: localUrl)
+                                            .frame(height: UIScreen.main.bounds.width * 9 / 16)
+                                    } else {
+                                        Text("本地视频未找到")
+                                            .frame(height: UIScreen.main.bounds.width * 9 / 16)
+                                            .background(Color.gray)
                                     }
-                                } else {
-                                    Text("视频路径为空")
-                                        .frame(height: UIScreen.main.bounds.width * 9 / 16)
-                                        .background(Color.gray)
                                 }
                             }
-
                             // 返回按钮
                             Button(action: {
                                 dismiss()
@@ -75,7 +69,7 @@ struct VideoPlayerView: View {
                                 TotalCommentView()
                             }
                             else if selectionTitle == "简介"{
-                                SimpleMesView(video:video)
+                                SimpleMesView(video: $video, viewModel: viewModel)
                             }
                         }
                     }
@@ -83,6 +77,18 @@ struct VideoPlayerView: View {
 
                 }
             }
+        .overlay(
+            Color.black
+                .frame(height: safeAreaTop)
+                .ignoresSafeArea(edges: .top),
+            alignment: .top
+        )
+        .onAppear {
+            hideTabBar = true // 进入时隐藏标签栏
+        }
+        .onDisappear {
+            hideTabBar = false // 退出时恢复标签栏
+        }
         .offset(offset)
         .simultaneousGesture(//避免被scrollview盖过
             DragGesture()

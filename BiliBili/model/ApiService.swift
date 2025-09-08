@@ -19,11 +19,11 @@ class ApiService {
     static let shared = ApiService()
     private init() {}
     
-    private let baseURL = "http://127.0.0.1:4523/m1/7076071-6797237-default"
+    private let baseURL = "http://127.0.0.1:4523/m1/7081214-6802624-default"
     
 
     func login(username: String, password: String, completion: @escaping (Result<String, Error>) -> Void) {
-        guard let url = URL(string: "\(baseURL)/user/login") else {
+        guard let url = URL(string: "\(baseURL)/user/log/psw") else {
             print(" URL 无效")
             completion(.failure(NSError(domain: "ApiService", code: -1, userInfo: [NSLocalizedDescriptionKey: "URL 无效"])))
             return
@@ -92,12 +92,12 @@ class ApiService {
         }.resume()
     }
 
-    func getVideosDecodable(page: Int = 1,
-                            pageSize: Int = 20,
+    func getVideosDecodable(page: Int = 0,
+                            pageSize: Int = 8,
                             token: String? = nil,
                             completion: @escaping (Result<[Videos], Error>) -> Void) {
         
-        var components = URLComponents(string: "\(baseURL)/user/videos")!
+        var components = URLComponents(string: "\(baseURL)/user/video/recommend")!
         components.queryItems = [
             URLQueryItem(name: "page", value: "\(page)"),
             URLQueryItem(name: "pagesize", value: "\(pageSize)")
@@ -130,7 +130,7 @@ class ApiService {
                 
                 do {
                     let response = try JSONDecoder().decode(VideoResponses.self, from: data)
-                    if response.code == 0 {
+                    if response.code == 200 {
                         completion(.success(response.data))
                     } else {
                         completion(.failure(NSError(domain: response.msg, code: response.code)))

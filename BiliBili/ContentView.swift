@@ -2,6 +2,14 @@
 
 import SwiftUI
 
+extension View {
+    var safeAreaTop: CGFloat {
+        UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .first?.windows.first?.safeAreaInsets.top ?? 0
+    }
+}
+
 struct ContentView: View {
     @State private var selectedTab = 0
     @State private var hideTabBar = false
@@ -13,7 +21,7 @@ struct ContentView: View {
                 // 主内容区域
                 Group {
                     switch selectedTab {
-                    case 0:firstbili(hideTabBar: $hideTabBar)//传递绑定
+                    case 0: FirstView(hideTabBar: $hideTabBar)//传递绑定
                     case 1: subview()
                     case 2: uploadview()
                     case 3: buyview()
@@ -27,7 +35,7 @@ struct ContentView: View {
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                
+
                 if !hideTabBar{
                     HStack(spacing: 0) {
                         ForEach(0..<5, id: \.self) { index in

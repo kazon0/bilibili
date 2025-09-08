@@ -7,35 +7,15 @@
 import SwiftUI
 
    struct SimpleMesView: View {
-       @State private var isLiked: Bool
-       @State private var isDisliked: Bool
-       @State private var isCollected: Bool
-       @State private var isCoined: Bool
 
-       let video: Videos
-       let upName: String
-       let upFans: String
-       let viewsCount: String
-       let danmuCount: String
-       let publishTime: String
+       @Binding var video: Videos
 
-       init(video: Videos) {
-           _isLiked = State(initialValue: video.isLike)
-           _isDisliked = State(initialValue: video.isDislike)
-           _isCollected = State(initialValue: video.isCollect)
-           _isCoined = State(initialValue: video.isCoin)
-           self.video = video
-           self.upName = video.upData.name ?? "未知作者"
-           self.upFans = "\(video.upData.fans ?? 0)粉丝"
-           self.viewsCount = "\(video.upData.videoCount ?? 0)"
-           self.danmuCount = "799"
-           self.publishTime = "2025-03-24 11:37"
-       }
+       @ObservedObject var viewModel: VideoViewModel
 
         var body: some View {
             // UP主信息区域
             HStack {
-                if let avatarURL = URL(string: video.upData.avator ?? "") {
+                if let avatarURL = URL(string: video.upData.avator) {
                     AsyncImage(url: avatarURL) { phase in
                         switch phase {
                         case .empty:
@@ -61,9 +41,9 @@ import SwiftUI
                 }
                 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(upName)
+                    Text(video.upData.name)
                         .font(.system(size: 15, weight: .medium))
-                    Text(upFans)
+                    Text("\(video.upData.fans) 粉丝")
                         .font(.system(size: 12))
                         .foregroundColor(.gray)
                 }
@@ -94,21 +74,21 @@ import SwiftUI
                     HStack(spacing: 4) {
                         Image(systemName: "play.rectangle")
                             .foregroundColor(.gray)
-                        Text(viewsCount)
+                        Text("\(video.upData.videoCount)")
                             .foregroundColor(.gray)
                     }
                     
                     HStack(spacing: 4) {
                         Image(systemName: "text.bubble")
                             .foregroundColor(.gray)
-                        Text(danmuCount)
+                        Text("799")
                             .foregroundColor(.gray)
                     }
                     
                     HStack(spacing: 4) {
                         Image(systemName: "clock")
                             .foregroundColor(.gray)
-                        Text(publishTime)
+                        Text("2025-03-24 11:37")
                             .foregroundColor(.gray)
                     }
                     
@@ -121,26 +101,27 @@ import SwiftUI
                 HStack(spacing: 50) {
                     VStack(spacing: 4) {
                         Button(action: {
-                            isLiked.toggle()
-                            isDisliked=false
+                            viewModel.toggleLike(for: video)
+                            print("视频ID:", video.id)
+                            print("点赞状态:", video.isLike)
+                            print("点赞数:", video.isLikeCount)
                         }) {
-                            Image(systemName: isLiked ? "hand.thumbsup.fill" : "hand.thumbsup")
+                            Image(systemName: video.isLike ? "hand.thumbsup.fill" : "hand.thumbsup")
                                 .font(.system(size: 22))
-                                .foregroundColor(isLiked ? Color(#colorLiteral(red: 1, green: 0.35, blue: 0.68, alpha: 1)) : .gray)
+                                .foregroundColor(video.isLike ? Color(#colorLiteral(red: 1, green: 0.35, blue: 0.68, alpha: 1)) : .gray)
                         }
-                        Text("8879")
+                        Text("\(video.isLikeCount)")
                             .font(.system(size: 12))
                             .foregroundColor(.gray)
                     }
                     
                     VStack(spacing: 4) {
                         Button(action: {
-                            isDisliked.toggle()
-                            isLiked=false
+                            viewModel.toggleDislike(for: video)
                         }) {
-                            Image(systemName: isDisliked ? "hand.thumbsdown.fill" : "hand.thumbsdown")
+                            Image(systemName: video.isDislike ? "hand.thumbsdown.fill" : "hand.thumbsdown")
                                 .font(.system(size: 22))
-                                .foregroundColor(isDisliked ? Color(#colorLiteral(red: 1, green: 0.35, blue: 0.68, alpha: 1)) : .gray)
+                                .foregroundColor(video.isDislike ? Color(#colorLiteral(red: 1, green: 0.35, blue: 0.68, alpha: 1)) : .gray)
                         }
                         Text("不喜欢")
                             .font(.system(size: 12))
@@ -149,26 +130,26 @@ import SwiftUI
                     
                     VStack(spacing: 4) {
                         Button(action: {
-                            isCoined.toggle()
+                            viewModel.toggleCoin(for: video)
                         }) {
-                            Image(systemName: isCoined ? "dollarsign.circle.fill" : "dollarsign.circle")
+                            Image(systemName: video.isCoin ? "dollarsign.circle.fill" : "dollarsign.circle")
                                 .font(.system(size: 22))
-                                .foregroundColor(isCoined ? Color(#colorLiteral(red: 1, green: 0.35, blue: 0.68, alpha: 1)) : .gray)
+                                .foregroundColor(video.isCoin ? Color(#colorLiteral(red: 1, green: 0.35, blue: 0.68, alpha: 1)) : .gray)
                         }
-                        Text("1793")
+                        Text("\(video.isCoinCount)")
                             .font(.system(size: 12))
                             .foregroundColor(.gray)
                     }
                     
                     VStack(spacing: 4) {
                         Button(action: {
-                            isCollected.toggle()
+                            viewModel.toggleCollect(for: video)
                         }) {
-                            Image(systemName: isCollected ? "star.fill" : "star")
+                            Image(systemName: video.isCollect ? "star.fill" : "star")
                                 .font(.system(size: 22))
-                                .foregroundColor(isCollected ? Color(#colorLiteral(red: 1, green: 0.35, blue: 0.68, alpha: 1)) : .gray)
+                                .foregroundColor(video.isCollect ? Color(#colorLiteral(red: 1, green: 0.35, blue: 0.68, alpha: 1)) : .gray)
                         }
-                        Text("1.1万")
+                        Text("\(video.isCollectCount)")
                             .font(.system(size: 12))
                             .foregroundColor(.gray)
                     }
@@ -193,11 +174,6 @@ import SwiftUI
             }
             .padding(.horizontal, 12)
             .padding(.top, 12)
-            ConnectVideoView(username: "怀旧党", image: "roll1", title: "怎么说 咋搞 说的就是我", count1: "11.1万",count2: "55")
-            ConnectVideoView(username: "怀旧党", image: "roll1", title: "怎么说 咋搞 说的就是我", count1: "11.1万",count2: "55")
-            ConnectVideoView(username: "怀旧党", image: "roll1", title: "怎么说 咋搞 说的就是我", count1: "11.1万",count2: "55")
-            ConnectVideoView(username: "怀旧党", image: "roll1", title: "怎么说 咋搞 说的就是我", count1: "11.1万",count2: "55")
-            ConnectVideoView(username: "怀旧党", image: "roll1", title: "怎么说 咋搞 说的就是我", count1: "11.1万",count2: "55")
             ConnectVideoView(username: "怀旧党", image: "roll1", title: "怎么说 咋搞 说的就是我", count1: "11.1万",count2: "55")
         }
     }
@@ -253,11 +229,6 @@ struct TotalCommentView: View {
             // 热门评论
             CommentView(username: "搜索引擎在冬天", avatar: "头像", content: "假如我有四亿美金，我天天都很平静。", time: "3小时前", likes: "25", isLiked: false,isunLiked: false)
             CommentView(username: "天蓝蓝没吃药", avatar: "头像", content: "天天笑哈基米哈气，搞半天自己就是应急的哈基米", time: "5小时前", likes: "282", isLiked: false,isunLiked: false)
-            CommentView(username: "怀旧党", avatar: "头像", content: "怎么说 咋搞 说的就是我", time: "昨天", likes: "2", isLiked: false,isunLiked: false)
-            CommentView(username: "怀旧党", avatar: "头像", content: "怎么说 咋搞 说的就是我", time: "昨天", likes: "2", isLiked: false,isunLiked: false)
-            CommentView(username: "怀旧党", avatar: "头像", content: "怎么说 咋搞 说的就是我", time: "昨天", likes: "2", isLiked: false,isunLiked: false)
-            CommentView(username: "怀旧党", avatar: "头像", content: "怎么说 咋搞 说的就是我", time: "昨天", likes: "2", isLiked: false,isunLiked: false)
-            CommentView(username: "怀旧党", avatar: "头像", content: "怎么说 咋搞 说的就是我", time: "昨天", likes: "2", isLiked: false,isunLiked: false)
             CommentView(username: "怀旧党", avatar: "头像", content: "怎么说 咋搞 说的就是我", time: "昨天", likes: "2", isLiked: false,isunLiked: false)
         }
     }
