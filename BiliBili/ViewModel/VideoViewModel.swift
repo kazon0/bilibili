@@ -51,59 +51,5 @@ class VideoViewModel: ObservableObject {
         }
     }
 
-    //切换点赞状态
-    func toggleLike(for video: Videos) {
-        guard !userToken.isEmpty else {
-            print("未登录，不能点赞")
-            return
-        }
-
-        if let index = videos.firstIndex(where: { $0.id == video.id }) {
-            videos[index].isLike.toggle()
-            
-            // 调试打印
-            print("toggleLike called for video id:", video.id)
-            print("isLike new value:", videos[index].isLike)
-        } else {
-            print("Video not found in viewModel.videos")
-        }
-    }
-
-    // 切换不喜欢状态
-    func toggleDislike(for video: Videos) {
-        guard !userToken.isEmpty else {
-            print("未登录，不能点踩")
-            return
-        }
-        if let index = videos.firstIndex(where: { $0.id == video.id }) {
-            // 点踩时，如果之前点了赞，要取消点赞
-            if videos[index].isLike {
-                videos[index].isLike = false
-            }
-            videos[index].isDislike.toggle()
-        }
-    }
-
-    // 切换收藏状态
-    func toggleCollect(for video: Videos) {
-        guard !userToken.isEmpty else {
-            print("未登录，不能收藏")
-            return
-        }
-        if let index = videos.firstIndex(where: { $0.id == video.id }) {
-            videos[index].isCollect.toggle()
-        }
-    }
-
-    //切换投币状态
-    func toggleCoin(for video: Videos) {
-        guard !userToken.isEmpty else {
-            print("未登录，不能投币")
-            return
-        }
-        if let index = videos.firstIndex(where: { $0.id == video.id }) {
-            videos[index].isCoin.toggle()
-        }
-    }
 }
 

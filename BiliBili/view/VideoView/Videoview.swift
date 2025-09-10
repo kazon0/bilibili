@@ -9,11 +9,14 @@
 
 import SwiftUI
 
+
 struct VideoPlayerView: View {
     //用环境变量控制导航
     @Environment(\.dismiss) private var dismiss
     @Binding var hideTabBar: Bool
     @Binding var video: Videos
+    
+    @ObservedObject var viewmodel: CollectionViewModel
 
     let choosetitle = ["简介", "评论"]
     @State var selectionTitle :String = "简介"
@@ -69,7 +72,7 @@ struct VideoPlayerView: View {
                                 TotalCommentView()
                             }
                             else if selectionTitle == "简介"{
-                                SimpleMesView(video: $video, viewModel: viewModel)
+                                SimpleMesView(video: $video, viewModel: viewModel, viewmodel: viewmodel)
                             }
                         }
                     }
@@ -99,11 +102,9 @@ struct VideoPlayerView: View {
                     let swipeThreshold: CGFloat = 100
                     if gesture.translation.height > swipeThreshold {
                         // 向下滑动
-                        print("向下滑动")
                         guesture="down"
                     } else if gesture.translation.height < -swipeThreshold {
                         // 向上滑动
-                        print("向上滑动")
                         guesture="up"
                     }
                     self.offset = .zero
@@ -113,6 +114,8 @@ struct VideoPlayerView: View {
              hideTabBar = true // 进入时隐藏标签栏
          }
         .navigationBarHidden(true)
+        
+        
     }
     
     var headerView: some View {

@@ -17,8 +17,9 @@ struct FirstView: View {
     @State private var selectedVideo: Videos? = nil
     @State private var navigateToVideo = false // 控制跳转
     
+   
     @StateObject private var viewModel = VideoViewModel()
-    
+    @StateObject private var viewmodel = CollectionViewModel()
 
     var body: some View {
         NavigationStack {
@@ -50,7 +51,7 @@ struct FirstView: View {
             }
             .navigationDestination(isPresented: $navigateToVideo) {
                     if let video = selectedVideo {
-                        VideoPlayerView(hideTabBar: $hideTabBar,video: .constant(video), viewModel: viewModel)
+                        VideoPlayerView(hideTabBar: $hideTabBar,video: .constant(video), viewmodel: viewmodel, viewModel: viewModel)
                             .navigationBarBackButtonHidden(true)
                     } else {
                         Text("未选择视频")

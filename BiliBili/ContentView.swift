@@ -21,7 +21,7 @@ struct ContentView: View {
                 // 主内容区域
                 Group {
                     switch selectedTab {
-                    case 0: FirstView(hideTabBar: $hideTabBar)//传递绑定
+                    case 0: FirstView(hideTabBar: $hideTabBar)
                     case 1: subview()
                     case 2: uploadview()
                     case 3: buyview()
