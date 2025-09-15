@@ -9,7 +9,7 @@ import SwiftUI
 
 struct PersonView: View {
     @AppStorage("userToken") private var userToken: String = ""
-    @Binding var hideTabBar: Bool
+    @EnvironmentObject var tabBarManager: TabBarManager
     
     @State var columns: [GridItem] = [
         GridItem(.flexible())
@@ -26,7 +26,7 @@ struct PersonView: View {
     @State private var showCollection = false
     
     @EnvironmentObject var viewModel: CollectionViewModel
-    @ObservedObject var videoViewModel: VideoViewModel
+    @EnvironmentObject var videoViewModel: VideoViewModel
     
     var body: some View {
         NavigationStack {
@@ -48,8 +48,10 @@ struct PersonView: View {
                 }
             }
             .navigationDestination(isPresented: $showCollection) {
-                CollectionListView(videoViewModel: videoViewModel, hideTabBar: $hideTabBar)
+                CollectionListView(isPresented: $showCollection)
+                    .environmentObject(tabBarManager)
                     .environmentObject(viewModel)
+                    .environmentObject(videoViewModel)
                     .navigationBarBackButtonHidden(true)
             }
             .overlay(
@@ -70,7 +72,6 @@ struct PersonView: View {
         .onAppear {
             print("用户 token:", userToken)
         }
-
     }
 }
 

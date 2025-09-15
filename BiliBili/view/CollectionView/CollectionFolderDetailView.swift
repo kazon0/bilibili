@@ -11,7 +11,9 @@ import SwiftUI
 struct CollectionFolderDetailView: View {
     @ObservedObject var folder: CollectionFolder
     @EnvironmentObject var viewModel: CollectionViewModel
-    @ObservedObject var videoViewModel: VideoViewModel
+    @EnvironmentObject var videoViewModel: VideoViewModel
+    @Binding var showDetail: Bool
+    @EnvironmentObject var tabBarManager: TabBarManager
 
     private var videos: [Videos] {
         videoViewModel.videos.filter { folder.videoIDsArray.contains($0.id) }
@@ -27,6 +29,10 @@ struct CollectionFolderDetailView: View {
                     viewModel.removeVideoID(videos[index].id, from: folder)
                 }
             }
+        }
+        .onAppear {
+            showDetail=true
+            tabBarManager.isHidden = true
         }
         .navigationTitle(folder.name ?? "未命名")
     }
@@ -61,6 +67,9 @@ struct CollectionFolderDetailView: View {
 
     // 播放页
     func videoPlayer(for video: Videos) -> some View {
-        VideoPlayerView(hideTabBar: .constant(true),video: .constant(video), videoViewModel: videoViewModel)
+        VideoPlayerView(video: .constant(video))
+            .environmentObject(viewModel)
+            .environmentObject(videoViewModel)
+            .environmentObject(tabBarManager)
     }
 }

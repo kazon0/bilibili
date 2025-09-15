@@ -12,17 +12,14 @@ extension View {
 
 struct ContentView: View {
     @State private var selectedTab = 0
-    @State private var hideTabBar = false
-    @EnvironmentObject var viewModel: CollectionViewModel
-    @StateObject private var videoViewModel = VideoViewModel()
+    @StateObject private var tabBarManager = TabBarManager()
     @AppStorage("userToken") private var userToken: String = ""
     
     var body: some View {
             ZStack(alignment: .bottom) {
-                // 主内容区域
                 Group {
                     switch selectedTab {
-                    case 0: FirstView(hideTabBar: $hideTabBar, videoViewModel: videoViewModel)
+                    case 0: FirstView()
                     case 1: subview()
                     case 2: uploadview()
                     case 3: buyview()
@@ -30,14 +27,16 @@ struct ContentView: View {
                         if userToken.isEmpty {
                             MyPageView()
                         } else {
-                            PersonView(hideTabBar: $hideTabBar, videoViewModel: videoViewModel)
+                            PersonView()
+                              
                         }
                     default: EmptyView()
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .environmentObject(tabBarManager)
 
-                if !hideTabBar{
+                if !tabBarManager.isHidden{
                     HStack(spacing: 0) {
                         ForEach(0..<5, id: \.self) { index in
                             Button(action: {
@@ -90,5 +89,6 @@ struct ContentView: View {
 #Preview {
     ContentView()
         .environmentObject(CollectionViewModel())
+        .environmentObject(VideoViewModel())
 }
 

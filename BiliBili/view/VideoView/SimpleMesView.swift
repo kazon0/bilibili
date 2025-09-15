@@ -11,7 +11,7 @@ import SwiftUI
        @Binding var video: Videos
 
        @State private var showToast = false
-       @ObservedObject var videoViewModel: VideoViewModel
+       @EnvironmentObject var videoViewModel: VideoViewModel
        @State private var showFolderSelection = false
        
        @EnvironmentObject var viewModel: CollectionViewModel

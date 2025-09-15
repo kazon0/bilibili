@@ -13,7 +13,7 @@ import SwiftUI
 struct VideoPlayerView: View {
     //用环境变量控制导航
     @Environment(\.dismiss) private var dismiss
-    @Binding var hideTabBar: Bool
+    @EnvironmentObject var tabBarManager: TabBarManager
     @Binding var video: Videos
     
     @EnvironmentObject var viewModel: CollectionViewModel
@@ -26,7 +26,7 @@ struct VideoPlayerView: View {
     @State var guesture :String = ""
     
     @StateObject private var playerWrapper = PlayerWrapper()
-    @ObservedObject var videoViewModel: VideoViewModel
+    @EnvironmentObject var videoViewModel: VideoViewModel
     
     var body: some View {
 
@@ -36,9 +36,7 @@ struct VideoPlayerView: View {
                 // 视频封面/播放区域
                 if guesture != "up"{
                     ZStack(alignment: .bottom){
-                        
                         ZStack(alignment: .topLeading){
-
                             Group {
                                 VStack {
                                     if let path = Bundle.main.path(forResource: "video1", ofType: "mp4") {
@@ -62,22 +60,17 @@ struct VideoPlayerView: View {
                             .padding()
                             
                         }
-                        ProgressbarView(playerWrapper: playerWrapper)
-                        }
-            }
-           
+                        ProgressbarView(playerWrapper: playerWrapper)}}
                     LazyVGrid(columns: columns, pinnedViews: [.sectionHeaders]) {
                         Section(header : headerView) {
                             if selectionTitle == "评论"{
                                 TotalCommentView()
                             }
                             else if selectionTitle == "简介"{
-                                SimpleMesView(video: $video, videoViewModel: videoViewModel)
+                                SimpleMesView(video: $video)
                             }
                         }
                     }
-                    
-
                 }
             }
         .overlay(
@@ -86,12 +79,6 @@ struct VideoPlayerView: View {
                 .ignoresSafeArea(edges: .top),
             alignment: .top
         )
-        .onAppear {
-            hideTabBar = true // 进入时隐藏标签栏
-        }
-        .onDisappear {
-            hideTabBar = false // 退出时恢复标签栏
-        }
         .offset(offset)
         .simultaneousGesture(//避免被scrollview盖过
             DragGesture()
@@ -110,12 +97,7 @@ struct VideoPlayerView: View {
                     self.offset = .zero
                 }
         )
-        .onAppear {
-             hideTabBar = true // 进入时隐藏标签栏
-         }
         .navigationBarHidden(true)
-        
-        
     }
     
     var headerView: some View {

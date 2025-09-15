@@ -56,7 +56,7 @@ struct SimpleAutoScrollView: View {
 struct HeaderView: View {
     let userToken: String
     @Binding var showSearchView: Bool
-    @Binding var hideTabBar: Bool
+    @EnvironmentObject var tabBarManager: TabBarManager
 
     var body: some View {
         HStack(spacing: 10) {
@@ -69,7 +69,7 @@ struct HeaderView: View {
 
             Button(action: {
                 showSearchView = true
-                hideTabBar = true
+                tabBarManager.isHidden = true
             }) {
                 HStack {
                     Image(systemName: "magnifyingglass")
@@ -92,7 +92,7 @@ struct HeaderView: View {
 struct VideoGridView: View {
     let videos: [Videos]
     @Binding var selectedVideo: Videos?
-    @Binding var hideTabBar: Bool
+    @EnvironmentObject var tabBarManager: TabBarManager
     @Binding var navigateToVideo: Bool
     let userToken: String
 
@@ -104,7 +104,7 @@ struct VideoGridView: View {
                 VideoCardView(video: video)
                     .onTapGesture {
                         selectedVideo = video
-                        hideTabBar = true
+                        tabBarManager.isHidden = true
                         navigateToVideo = true
                     }
             }

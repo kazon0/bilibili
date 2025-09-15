@@ -7,18 +7,17 @@
 
 import SwiftUI
 
-
 struct FirstView: View {
     @State var columns: [GridItem] = [GridItem(.flexible())]
     @State var columns2: [GridItem] = [GridItem(.flexible()), GridItem(.flexible())]
     @State private var showSearchView = false
     @State private var showVideoView = false
-    @Binding var hideTabBar: Bool
     @State private var selectedVideo: Videos? = nil
     @State private var navigateToVideo = false // 控制跳转
     
+    @EnvironmentObject var tabBarManager: TabBarManager
    
-    @ObservedObject var videoViewModel: VideoViewModel
+    @EnvironmentObject var videoViewModel: VideoViewModel
     @EnvironmentObject var viewModel: CollectionViewModel
 
     var body: some View {
@@ -28,11 +27,9 @@ struct FirstView: View {
                     selectedVideo: $selectedVideo,
                     columns: $columns,
                     columns2: $columns2,
-                    hideTabBar: $hideTabBar,
                     navigateToVideo: $navigateToVideo,
                     showSearchView: $showSearchView,
-                    showVideoView: $showVideoView,
-                    viewModel: videoViewModel
+                    showVideoView: $showVideoView
                 )
             }
             .overlay(
@@ -46,12 +43,16 @@ struct FirstView: View {
             
             // 跳转到搜索页
             .navigationDestination(isPresented: $showSearchView) {
-                Searchview(hideTabBar: $hideTabBar)
+                Searchview()
+                    .onAppear { tabBarManager.isHidden = true }
+                    .onDisappear { tabBarManager.isHidden = false }
                     .navigationBarBackButtonHidden(true)
             }
             .navigationDestination(isPresented: $navigateToVideo) {
                     if let video = selectedVideo {
-                        VideoPlayerView(hideTabBar: $hideTabBar,video: .constant(video),videoViewModel: videoViewModel)
+                        VideoPlayerView(video: .constant(video))
+                            .onAppear { tabBarManager.isHidden = true }
+                            .onDisappear { tabBarManager.isHidden = false }
                             .navigationBarBackButtonHidden(true)
                     } else {
                         Text("未选择视频")
@@ -72,7 +73,6 @@ struct Showscroll: View {
     @State var selectionTitle :String = "推荐"
     @Binding var columns: [GridItem]
     @Binding var columns2: [GridItem]
-    @Binding var hideTabBar: Bool
     @Binding var navigateToVideo: Bool
     
     // 搜索相关状态
@@ -87,14 +87,14 @@ struct Showscroll: View {
     //登录状态
     @AppStorage("userToken") private var userToken: String = ""
     
-    @ObservedObject var viewModel: VideoViewModel
+    @EnvironmentObject var viewModel: VideoViewModel
+    @EnvironmentObject var tabBarManager: TabBarManager
     
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
             HeaderView(
                 userToken: userToken,
-                showSearchView: $showSearchView,
-                hideTabBar: $hideTabBar
+                showSearchView: $showSearchView
             )
             
             LazyVGrid(columns: columns, pinnedViews: [.sectionHeaders]) {
@@ -103,7 +103,6 @@ struct Showscroll: View {
                     VideoGridView(
                         videos: viewModel.videos,
                         selectedVideo: $selectedVideo,
-                        hideTabBar: $hideTabBar,
                         navigateToVideo: $navigateToVideo,
                         userToken: userToken
                     )
@@ -147,15 +146,16 @@ struct Showscroll: View {
 }
 
 
-//#Preview {
-//    // 创建一个本地状态用于预览
-//    struct PreviewWrapper: View {
-//        @State private var hideTabBar = false
-//        var body: some View {
-//            FirstView(hideTabBar: $hideTabBar)
-//        }
-//    }
-//    
-//    return PreviewWrapper()
-//}
-//
+#Preview {
+    // 创建一个本地状态用于预览
+    struct PreviewWrapper: View {
+        var body: some View {
+            FirstView()
+                .environmentObject(CollectionViewModel())
+                .environmentObject(VideoViewModel())
+        }
+    }
+    
+    return PreviewWrapper()
+}
+

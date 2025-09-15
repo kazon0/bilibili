@@ -9,7 +9,6 @@ import SwiftUI
 
 
 struct Searchview: View {
-    @Binding var hideTabBar: Bool
     @Environment(\.dismiss) private var dismiss
     var body: some View {
             VStack {
@@ -32,12 +31,6 @@ struct Searchview: View {
                 }
             }
             .padding(.horizontal)
-        .onAppear {
-             hideTabBar = true // 进入时隐藏标签栏
-         }
-        .onDisappear() {
-             hideTabBar = false
-         }
         .navigationBarHidden(true) // 隐藏导航栏
     }
 }
@@ -102,10 +95,9 @@ struct SearchBarView: View {
 struct Searchview_Previews: PreviewProvider {
     static var previews: some View {
         struct PreviewWrapper: View {
-            @State private var hideTabBar = false
             
             var body: some View {
-                Searchview(hideTabBar: $hideTabBar)
+                Searchview()
             }
         }
         

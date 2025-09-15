@@ -12,12 +12,14 @@ struct BiliBiliApp: App {
     
     let coreDataManager = CoreDataManager.shared
     @StateObject var collectionVM = CollectionViewModel()
+    @StateObject var VideoVM = VideoViewModel()
     
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .environment(\.managedObjectContext, coreDataManager.container.viewContext)
                 .environmentObject(collectionVM) // 注入全局环境
+                .environmentObject(VideoVM)
         }
     }
 }

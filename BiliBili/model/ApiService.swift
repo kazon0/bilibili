@@ -123,10 +123,10 @@ class ApiService {
                     return
                 }
                 
-                // 打印原始 JSON 字符串
-                if let jsonString = String(data: data, encoding: .utf8) {
-                    print("返回 JSON: \(jsonString)")
-                }
+//                // 打印原始 JSON 字符串
+//                if let jsonString = String(data: data, encoding: .utf8) {
+//                    print("返回 JSON: \(jsonString)")
+//                }
                 
                 do {
                     let response = try JSONDecoder().decode(VideoResponses.self, from: data)

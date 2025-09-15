@@ -9,22 +9,23 @@ import SwiftUI
 
 struct CollectionListView: View {
     @EnvironmentObject var viewModel: CollectionViewModel
-    @ObservedObject var videoViewModel: VideoViewModel
-    @Binding var hideTabBar: Bool
+    @EnvironmentObject var tabBarManager: TabBarManager
+    @Binding var isPresented: Bool
     @State var selectionTitle :String = "收藏"
     @State private var selectiontitle: String = "收藏夹"
+    @State var showDetail :Bool = false
 
     var body: some View {
         NavigationView{
             VStack{
-                CollectionHeaderView(selectionTitle: $selectionTitle)
+                CollectionHeaderView(isPresented: $isPresented, selectionTitle: $selectionTitle)
                 SecondHeaderView(selectiontitle: $selectiontitle)
                 if selectionTitle == "收藏" {
                     if selectiontitle == "收藏夹" {
                         ScrollView(.vertical, showsIndicators: false){
                             LazyVGrid(columns: [GridItem(.adaptive(minimum: 120), spacing: 16)], spacing: 16) {
                                 ForEach(viewModel.folders, id: \.objectID) { folder in
-                                    FolderLinkView(folder: folder, videoViewModel: videoViewModel)
+                                    FolderLinkView(folder: folder, showDetail: $showDetail)
                                 }
                             }
                             .padding()
@@ -44,12 +45,15 @@ struct CollectionListView: View {
                 }
             }
             .onAppear {
-                hideTabBar = true
+                tabBarManager.isHidden = true
                 print("CollectionListView appeared, folders count: \(viewModel.folders.count)")
                 viewModel.fetchFolders() // 确保数据被加载
+                showDetail = false
             }
             .onDisappear {
-                hideTabBar = false
+                if !showDetail{
+                    tabBarManager.isHidden = false
+                }
             }
         }
     }
@@ -57,10 +61,11 @@ struct CollectionListView: View {
 
 struct FolderLinkView: View {
     let folder: CollectionFolder
-    @ObservedObject var videoViewModel: VideoViewModel
+    @Binding var showDetail: Bool
+    @EnvironmentObject var tabBarManager: TabBarManager
     var body: some View {
-        NavigationLink(destination: CollectionFolderDetailView(folder: folder, videoViewModel: videoViewModel)
-            .environmentObject(VideoViewModel())
+        NavigationLink(destination:
+        CollectionFolderDetailView(folder: folder, showDetail: $showDetail)
         ) {
             CollectionFolderView(folder: folder)
         }
@@ -70,14 +75,14 @@ struct FolderLinkView: View {
 
 
 struct CollectionHeaderView: View {
-    @Environment(\.dismiss) private var dismiss
+    @Binding var isPresented: Bool
     let choosetitle = ["收藏", "追更", "想要"]
     @Binding var selectionTitle :String
    
     var body: some View {
         HStack{
             Button(action: {
-                dismiss()
+                isPresented = false
             }) {
                 Image(systemName: "chevron.left")
                     .font(.title2)
@@ -221,13 +226,14 @@ struct CollectionFolderView: View {
 }
 
 
-//#Preview {
-//    struct PreviewWrapper: View {
-//        @State var hideTabBar: Bool = false
-//        var body: some View {
-//            CollectionListView(hideTabBar: $hideTabBar)
-//                .environmentObject(CollectionViewModel())
-//        }
-//    }
-//    return PreviewWrapper()
-//}
+#Preview {
+    struct PreviewWrapper: View {
+        var body: some View {
+            CollectionListView(isPresented: .constant(true))
+                .environmentObject(CollectionViewModel())
+                .environmentObject(VideoViewModel())
+                .environmentObject(TabBarManager())
+        }
+    }
+    return PreviewWrapper()
+}

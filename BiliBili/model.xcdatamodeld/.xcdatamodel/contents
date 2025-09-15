@@ -1,13 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="23605" systemVersion="23G93" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithSwiftData="YES" userDefinedModelVersionIdentifier="">
-    <entity name="CollectionFolder" representedClassName="CollectionFolder" syncable="YES" codeGenerationType="class">
-        <attribute name="cover" optional="YES" attributeType="Binary"/>
-        <attribute name="desc" optional="YES" attributeType="String"/>
-        <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
-        <attribute name="isPublic" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
-        <attribute name="name" optional="YES" attributeType="String"/>
-        <relationship name="videos" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Video" inverseName="collections" inverseEntity="Video"/>
-    </entity>
     <entity name="Video" representedClassName="Video" syncable="YES" codeGenerationType="class">
         <attribute name="avator" optional="YES" attributeType="String"/>
         <attribute name="fans" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
@@ -25,6 +17,6 @@
         <attribute name="title" optional="YES" attributeType="String"/>
         <attribute name="uid" optional="YES" attributeType="String"/>
         <attribute name="videoCount" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
-        <relationship name="collections" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="CollectionFolder" inverseName="videos" inverseEntity="CollectionFolder"/>
+        <relationship name="collections" optional="YES" toMany="YES" deletionRule="Nullify"/>
     </entity>
 </model>
