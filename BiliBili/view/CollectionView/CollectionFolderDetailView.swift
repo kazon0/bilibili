@@ -10,28 +10,27 @@ import SwiftUI
 
 struct CollectionFolderDetailView: View {
     @ObservedObject var folder: CollectionFolder
-    @ObservedObject var viewModel: CollectionViewModel
-    @ObservedObject var viewmodel: VideoViewModel
-    
-    var allVideos: [Videos]
+    @EnvironmentObject var viewModel: CollectionViewModel
+    @ObservedObject var videoViewModel: VideoViewModel
+
+    private var videos: [Videos] {
+        videoViewModel.videos.filter { folder.videoIDsArray.contains($0.id) }
+    }
 
     var body: some View {
-        // 根据 ID 获取视频
-        let videos = allVideos.filter { folder.videoIDsArray.contains($0.id) }
-
         List {
             ForEach(videos, id: \.id) { video in
                 videoRow(video: video)
             }
             .onDelete { indexSet in
                 indexSet.forEach { index in
-                    // 取消收藏
                     viewModel.removeVideoID(videos[index].id, from: folder)
                 }
             }
         }
         .navigationTitle(folder.name ?? "未命名")
     }
+
 
     // 单独拆出视频行
     @ViewBuilder
@@ -62,6 +61,6 @@ struct CollectionFolderDetailView: View {
 
     // 播放页
     func videoPlayer(for video: Videos) -> some View {
-        VideoPlayerView(hideTabBar: .constant(true),video: .constant(video), viewmodel: viewModel, viewModel: viewmodel)
+        VideoPlayerView(hideTabBar: .constant(true),video: .constant(video), videoViewModel: videoViewModel)
     }
 }

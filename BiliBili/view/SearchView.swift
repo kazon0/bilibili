@@ -8,7 +8,7 @@
 import SwiftUI
 
 
-struct searchview: View {
+struct Searchview: View {
     @Binding var hideTabBar: Bool
     @Environment(\.dismiss) private var dismiss
     var body: some View {
@@ -34,6 +34,9 @@ struct searchview: View {
             .padding(.horizontal)
         .onAppear {
              hideTabBar = true // 进入时隐藏标签栏
+         }
+        .onDisappear() {
+             hideTabBar = false
          }
         .navigationBarHidden(true) // 隐藏导航栏
     }
@@ -92,23 +95,17 @@ struct SearchBarView: View {
     
     private func performSearch() {
         print("执行搜索: \(searchText)")
-        hideKeyboard()
-    }
-    
-    private func hideKeyboard() {
-        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 }
 
 
-struct searchview_Previews: PreviewProvider {
+struct Searchview_Previews: PreviewProvider {
     static var previews: some View {
-        // 创建一个本地状态用于预览
         struct PreviewWrapper: View {
             @State private var hideTabBar = false
             
             var body: some View {
-                searchview(hideTabBar: $hideTabBar)
+                Searchview(hideTabBar: $hideTabBar)
             }
         }
         

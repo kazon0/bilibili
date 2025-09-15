@@ -11,10 +11,10 @@ import SwiftUI
        @Binding var video: Videos
 
        @State private var showToast = false
-       @ObservedObject var viewModel: VideoViewModel
+       @ObservedObject var videoViewModel: VideoViewModel
        @State private var showFolderSelection = false
        
-       @ObservedObject var viewmodel: CollectionViewModel
+       @EnvironmentObject var viewModel: CollectionViewModel
 
         var body: some View {
             // UP主信息区域
@@ -151,8 +151,8 @@ import SwiftUI
                             VStack(spacing: 4) {
                                 Button(action: {
                                     // 调用 ViewModel 方法获取默认收藏夹
-                                    let folder = viewmodel.defaultFolder()
-                                    viewmodel.add(video: video, to: folder)
+                                    let folder = viewModel.defaultFolder()
+                                    viewModel.add(video: video, to: folder)
                                     showToast = true
                                     //viewmodel.cleanupDuplicateDefaultFolders()
                                     DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
@@ -187,13 +187,13 @@ import SwiftUI
                         Divider()
                     }
                     .sheet(isPresented: $showFolderSelection) {
-                        CollectionFolderListViewForSelection(viewModel: viewmodel, video: video, isPresented: $showFolderSelection)
+                        CollectionFolderListViewForSelection(video: video, isPresented: $showFolderSelection)
                     }
                     .padding(.horizontal, 12)
                     .padding(.top, 12)
                     ConnectVideoView(username: "怀旧党", image: "roll1", title: "怎么说 咋搞 说的就是我", count1: "11.1万",count2: "55")
                     if showToast {
-                            FavoriteAddedToast(folderName: viewmodel.defaultFolder().name ?? "默认收藏夹") {
+                            FavoriteAddedToast(folderName: viewModel.defaultFolder().name ?? "默认收藏夹") {
                                 showToast = false
                                 showFolderSelection = true
                         }

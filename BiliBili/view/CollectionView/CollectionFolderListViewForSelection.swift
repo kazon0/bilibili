@@ -9,7 +9,7 @@ import SwiftUI
 
 // 收藏夹选择页面
 struct CollectionFolderListViewForSelection: View {
-    @ObservedObject var viewModel: CollectionViewModel
+    @EnvironmentObject var viewModel: CollectionViewModel
     var video: Videos
     @Binding var isPresented: Bool
     

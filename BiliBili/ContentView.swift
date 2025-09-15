@@ -13,7 +13,8 @@ extension View {
 struct ContentView: View {
     @State private var selectedTab = 0
     @State private var hideTabBar = false
-    
+    @EnvironmentObject var viewModel: CollectionViewModel
+    @StateObject private var videoViewModel = VideoViewModel()
     @AppStorage("userToken") private var userToken: String = ""
     
     var body: some View {
@@ -21,7 +22,7 @@ struct ContentView: View {
                 // 主内容区域
                 Group {
                     switch selectedTab {
-                    case 0: FirstView(hideTabBar: $hideTabBar)
+                    case 0: FirstView(hideTabBar: $hideTabBar, videoViewModel: videoViewModel)
                     case 1: subview()
                     case 2: uploadview()
                     case 3: buyview()
@@ -29,7 +30,7 @@ struct ContentView: View {
                         if userToken.isEmpty {
                             MyPageView()
                         } else {
-                            personview()
+                            PersonView(hideTabBar: $hideTabBar, videoViewModel: videoViewModel)
                         }
                     default: EmptyView()
                     }
@@ -88,5 +89,6 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
+        .environmentObject(CollectionViewModel())
 }
 

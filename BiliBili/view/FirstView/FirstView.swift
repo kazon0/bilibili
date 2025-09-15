@@ -18,8 +18,8 @@ struct FirstView: View {
     @State private var navigateToVideo = false // 控制跳转
     
    
-    @StateObject private var viewModel = VideoViewModel()
-    @StateObject private var viewmodel = CollectionViewModel()
+    @ObservedObject var videoViewModel: VideoViewModel
+    @EnvironmentObject var viewModel: CollectionViewModel
 
     var body: some View {
         NavigationStack {
@@ -32,7 +32,7 @@ struct FirstView: View {
                     navigateToVideo: $navigateToVideo,
                     showSearchView: $showSearchView,
                     showVideoView: $showVideoView,
-                    viewModel: viewModel
+                    viewModel: videoViewModel
                 )
             }
             .overlay(
@@ -46,12 +46,12 @@ struct FirstView: View {
             
             // 跳转到搜索页
             .navigationDestination(isPresented: $showSearchView) {
-                searchview(hideTabBar: $hideTabBar)
+                Searchview(hideTabBar: $hideTabBar)
                     .navigationBarBackButtonHidden(true)
             }
             .navigationDestination(isPresented: $navigateToVideo) {
                     if let video = selectedVideo {
-                        VideoPlayerView(hideTabBar: $hideTabBar,video: .constant(video), viewmodel: viewmodel, viewModel: viewModel)
+                        VideoPlayerView(hideTabBar: $hideTabBar,video: .constant(video),videoViewModel: videoViewModel)
                             .navigationBarBackButtonHidden(true)
                     } else {
                         Text("未选择视频")
@@ -147,15 +147,15 @@ struct Showscroll: View {
 }
 
 
-#Preview {
-    // 创建一个本地状态用于预览
-    struct PreviewWrapper: View {
-        @State private var hideTabBar = false
-        var body: some View {
-            FirstView(hideTabBar: $hideTabBar)
-        }
-    }
-    
-    return PreviewWrapper()
-}
-
+//#Preview {
+//    // 创建一个本地状态用于预览
+//    struct PreviewWrapper: View {
+//        @State private var hideTabBar = false
+//        var body: some View {
+//            FirstView(hideTabBar: $hideTabBar)
+//        }
+//    }
+//    
+//    return PreviewWrapper()
+//}
+//

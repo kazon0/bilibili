@@ -16,7 +16,7 @@ struct VideoPlayerView: View {
     @Binding var hideTabBar: Bool
     @Binding var video: Videos
     
-    @ObservedObject var viewmodel: CollectionViewModel
+    @EnvironmentObject var viewModel: CollectionViewModel
 
     let choosetitle = ["简介", "评论"]
     @State var selectionTitle :String = "简介"
@@ -26,7 +26,7 @@ struct VideoPlayerView: View {
     @State var guesture :String = ""
     
     @StateObject private var playerWrapper = PlayerWrapper()
-    @ObservedObject var viewModel: VideoViewModel
+    @ObservedObject var videoViewModel: VideoViewModel
     
     var body: some View {
 
@@ -72,7 +72,7 @@ struct VideoPlayerView: View {
                                 TotalCommentView()
                             }
                             else if selectionTitle == "简介"{
-                                SimpleMesView(video: $video, viewModel: viewModel, viewmodel: viewmodel)
+                                SimpleMesView(video: $video, videoViewModel: videoViewModel)
                             }
                         }
                     }
