@@ -14,6 +14,10 @@ struct CollectionListView: View {
     @State var selectionTitle :String = "收藏"
     @State private var selectiontitle: String = "收藏夹"
     @State var showDetail :Bool = false
+    
+    let columns = [
+        GridItem(.flexible())
+    ]
 
     var body: some View {
         NavigationView{
@@ -23,12 +27,15 @@ struct CollectionListView: View {
                 if selectionTitle == "收藏" {
                     if selectiontitle == "收藏夹" {
                         ScrollView(.vertical, showsIndicators: false){
-                            LazyVGrid(columns: [GridItem(.adaptive(minimum: 120), spacing: 16)], spacing: 16) {
+                            LazyVGrid(columns: columns, spacing: 16){
                                 ForEach(viewModel.folders, id: \.objectID) { folder in
                                     FolderLinkView(folder: folder, showDetail: $showDetail)
+                                        .padding(.leading,-190)
                                 }
                             }
                             .padding()
+                            CollectionAddView(showDetail: $showDetail)
+                                .padding(.top,40)
                         }
                         .background(Color.gray.opacity(0.1))
                     }
@@ -225,6 +232,28 @@ struct CollectionFolderView: View {
     }
 }
 
+struct CollectionAddView: View {
+    @Binding var showDetail: Bool
+    var body: some View {
+        NavigationLink(destination:
+            AddCollectionFolderView(showDetail: $showDetail)
+                .navigationBarBackButtonHidden(true)
+        ){
+            HStack(spacing: 3){
+                Image(systemName: "plus")
+                Text("新建收藏夹")
+                    .font(.subheadline)
+            }
+            .foregroundColor(Color.gray)
+            .padding(.horizontal, 13)
+            .padding(.vertical, 12)
+            .background(
+                Capsule()
+                .stroke(Color.gray.opacity(0.25),lineWidth: 1))
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+}
 
 #Preview {
     struct PreviewWrapper: View {

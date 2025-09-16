@@ -9,7 +9,6 @@ import Foundation
 import SwiftUI
 import CoreData
 
-// MARK: - CollectionFolder 扩展
 extension CollectionFolder {
     /// 方便获取 videoIDs 的数组形式
     var videoIDsArray: [String] {
@@ -60,7 +59,6 @@ extension CollectionFolder {
     }
 }
 
-// MARK: - CollectionViewModel 扩展
 extension CollectionViewModel {
     /// 获取唯一的默认收藏夹
     func defaultFolder() -> CollectionFolder {
@@ -116,7 +114,6 @@ extension CollectionViewModel {
 }
 
 
-// MARK: - CollectionViewModel
 class CollectionViewModel: ObservableObject {
     let context = CoreDataManager.shared.container.viewContext
 
@@ -147,7 +144,15 @@ class CollectionViewModel: ObservableObject {
         save()
         fetchFolders()
     }
-
+    
+    /// 删除指定收藏夹
+    func deleteFolder(_ folder: CollectionFolder) {
+        context.delete(folder)        // 删除 Core Data 对象
+        save()                        // 保存上下文
+        fetchFolders()                // 刷新 folders 数组
+        print("[Debug] 已删除收藏夹 '\(folder.name ?? "未命名")'")
+    }
+    
     // 添加 videoID
     func addVideoID(_ id: String, to folder: CollectionFolder) {
         let added = folder.addVideoID(id)

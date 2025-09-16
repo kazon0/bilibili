@@ -186,9 +186,9 @@ import SwiftUI
                         Spacer()
                         Divider()
                     }
-                    .sheet(isPresented: $showFolderSelection) {
-                        CollectionFolderListViewForSelection(video: video, isPresented: $showFolderSelection)
-                    }
+//                    .sheet(isPresented: $showFolderSelection) {
+//                        CollectionFolderListViewForSelection(video: video, isPresented: $showFolderSelection)
+//                    }
                     .padding(.horizontal, 12)
                     .padding(.top, 12)
                     ConnectVideoView(username: "怀旧党", image: "roll1", title: "怎么说 咋搞 说的就是我", count1: "11.1万",count2: "55")
