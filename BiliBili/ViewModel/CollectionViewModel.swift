@@ -152,7 +152,7 @@ class CollectionViewModel: ObservableObject {
         fetchFolders()                // 刷新 folders 数组
         print("[Debug] 已删除收藏夹 '\(folder.name ?? "未命名")'")
     }
-    
+
     // 添加 videoID
     func addVideoID(_ id: String, to folder: CollectionFolder) {
         let added = folder.addVideoID(id)

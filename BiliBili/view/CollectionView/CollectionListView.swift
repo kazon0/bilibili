@@ -15,6 +15,7 @@ struct CollectionListView: View {
     @State private var selectiontitle: String = "收藏夹"
     @State var showDetail :Bool = false
     
+    
     let columns = [
         GridItem(.flexible())
     ]
@@ -182,6 +183,29 @@ struct SecondHeaderView: View {
     }
 }
 
+struct CollectionAddView: View {
+    @Binding var showDetail: Bool
+    var body: some View {
+        NavigationLink(destination:
+            AddCollectionFolderView(showDetail: $showDetail)
+                .navigationBarBackButtonHidden(true)
+        ){
+            HStack(spacing: 3){
+                Image(systemName: "plus")
+                Text("新建收藏夹")
+                    .font(.subheadline)
+            }
+            .foregroundColor(Color.gray)
+            .padding(.horizontal, 13)
+            .padding(.vertical, 12)
+            .background(
+                Capsule()
+                .stroke(Color.gray.opacity(0.25),lineWidth: 1))
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+}
+
 struct CollectionFolderView: View {
     let folder: CollectionFolder   
 
@@ -232,28 +256,6 @@ struct CollectionFolderView: View {
     }
 }
 
-struct CollectionAddView: View {
-    @Binding var showDetail: Bool
-    var body: some View {
-        NavigationLink(destination:
-            AddCollectionFolderView(showDetail: $showDetail)
-                .navigationBarBackButtonHidden(true)
-        ){
-            HStack(spacing: 3){
-                Image(systemName: "plus")
-                Text("新建收藏夹")
-                    .font(.subheadline)
-            }
-            .foregroundColor(Color.gray)
-            .padding(.horizontal, 13)
-            .padding(.vertical, 12)
-            .background(
-                Capsule()
-                .stroke(Color.gray.opacity(0.25),lineWidth: 1))
-        }
-        .buttonStyle(PlainButtonStyle())
-    }
-}
 
 #Preview {
     struct PreviewWrapper: View {
