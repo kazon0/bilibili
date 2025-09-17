@@ -74,6 +74,7 @@ struct AddCollectionHeaderView: View {
             }
             .padding(.trailing,20)
         }
+        .padding(.vertical)
     }
 }
 

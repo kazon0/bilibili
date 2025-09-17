@@ -24,80 +24,115 @@ struct VideoPlayerView: View {
     let columns = [GridItem(.flexible())]  // 只有一列，宽度灵活填充
     @State private var offset = CGSize.zero
     @State var guesture :String = ""
+    @State private var showFolderSelection = false
+    @State private var dragOffset = CGSize.zero
     
     @StateObject private var playerWrapper = PlayerWrapper()
     @EnvironmentObject var videoViewModel: VideoViewModel
     
     var body: some View {
-
-        ScrollView(.vertical, showsIndicators: false){
-            
-            VStack(alignment: .leading, spacing: 0) {
-                // 视频封面/播放区域
-                if guesture != "up"{
-                    ZStack(alignment: .bottom){
-                        ZStack(alignment: .topLeading){
-                            Group {
-                                VStack {
-                                    if let path = Bundle.main.path(forResource: "video1", ofType: "mp4") {
-                                        let localUrl = URL(fileURLWithPath: path)
-                                        SimpleVideoPlayerView(playerWrapper: playerWrapper, videoURL: localUrl)
-                                            .frame(height: UIScreen.main.bounds.width * 9 / 16)
-                                    } else {
-                                        Text("本地视频未找到")
-                                            .frame(height: UIScreen.main.bounds.width * 9 / 16)
-                                            .background(Color.gray)
+        ZStack{
+            ScrollView(.vertical, showsIndicators: false){
+                
+                VStack(alignment: .leading, spacing: 0) {
+                    // 视频封面/播放区域
+                    if guesture != "up"{
+                        ZStack(alignment: .bottom){
+                            ZStack(alignment: .topLeading){
+                                Group {
+                                    VStack {
+                                        if let path = Bundle.main.path(forResource: "video1", ofType: "mp4") {
+                                            let localUrl = URL(fileURLWithPath: path)
+                                            SimpleVideoPlayerView(playerWrapper: playerWrapper, videoURL: localUrl)
+                                                .frame(height: UIScreen.main.bounds.width * 9 / 16)
+                                        } else {
+                                            Text("本地视频未找到")
+                                                .frame(height: UIScreen.main.bounds.width * 9 / 16)
+                                                .background(Color.gray)
+                                        }
                                     }
                                 }
+                                // 返回按钮
+                                Button(action: {
+                                    dismiss()
+                                }) {
+                                    Image(systemName: "chevron.left")
+                                        .foregroundColor(Color(#colorLiteral(red: 0.7345525622, green: 0.7345526218, blue: 0.7345525622, alpha: 1)))
+                                }
+                                .padding()
+                                
                             }
-                            // 返回按钮
-                            Button(action: {
-                                dismiss()
-                            }) {
-                                Image(systemName: "chevron.left")
-                                    .foregroundColor(Color(#colorLiteral(red: 0.7345525622, green: 0.7345526218, blue: 0.7345525622, alpha: 1)))
-                            }
-                            .padding()
-                            
-                        }
-                        ProgressbarView(playerWrapper: playerWrapper)}}
-                    LazyVGrid(columns: columns, pinnedViews: [.sectionHeaders]) {
-                        Section(header : headerView) {
-                            if selectionTitle == "评论"{
-                                TotalCommentView()
-                            }
-                            else if selectionTitle == "简介"{
-                                SimpleMesView(video: $video)
+                            ProgressbarView(playerWrapper: playerWrapper)}}
+                        LazyVGrid(columns: columns, pinnedViews: [.sectionHeaders]) {
+                            Section(header : headerView) {
+                                if selectionTitle == "评论"{
+                                    TotalCommentView()
+                                }
+                                else if selectionTitle == "简介"{
+                                    SimpleMesView(video: $video, showFolderSelection: $showFolderSelection)
+                                }
                             }
                         }
                     }
                 }
+            .overlay(
+                Color.black
+                    .frame(height: safeAreaTop)
+                    .ignoresSafeArea(edges: .top),
+                alignment: .top
+            )
+            .offset(offset)
+            .simultaneousGesture(//避免被scrollview盖过
+                DragGesture()
+                    .onChanged { gesture in
+                        self.offset = CGSize(width: 0, height: gesture.translation.height)
+                    }
+                    .onEnded { gesture in
+                        let swipeThreshold: CGFloat = 100
+                        if gesture.translation.height > swipeThreshold {
+                            // 向下滑动
+                            guesture="down"
+                        } else if gesture.translation.height < -swipeThreshold {
+                            // 向上滑动
+                            guesture="up"
+                        }
+                        self.offset = .zero
+                    }
+            )
+            .navigationBarHidden(true)
+            // 自定义视图，模拟滑动关闭
+            if showFolderSelection {
+                    Rectangle()
+                        .foregroundColor(.black)
+                        .opacity(dragOffset.height > 0 ? 0 : 0.3)
+                        .animation(.easeOut, value: dragOffset.height)
+
+                    CollectionListSelectionView()
+                        .offset(y:250)
+                        .offset(y: dragOffset.height) // 根据拖动调整位置
+                        .gesture(
+                            DragGesture()
+                                .onChanged { value in
+                                    // 更新拖动偏移
+                                    if value.translation.height > 0{ // 向下滑动时
+                                        dragOffset = value.translation
+                                    }
+                                }
+                                .onEnded { value in
+                                    // 如果滑动超过一定距离，则关闭视图
+                                    if dragOffset.height > 10 {
+                                        withAnimation {
+                                            showFolderSelection = false
+                                        }
+                                    }
+                                    // 重置偏移
+                                    dragOffset = .zero
+                                }
+                        )
+                        .animation(.easeOut, value: dragOffset) // 动画效果
             }
-        .overlay(
-            Color.black
-                .frame(height: safeAreaTop)
-                .ignoresSafeArea(edges: .top),
-            alignment: .top
-        )
-        .offset(offset)
-        .simultaneousGesture(//避免被scrollview盖过
-            DragGesture()
-                .onChanged { gesture in
-                    self.offset = CGSize(width: 0, height: gesture.translation.height)
-                }
-                .onEnded { gesture in
-                    let swipeThreshold: CGFloat = 100
-                    if gesture.translation.height > swipeThreshold {
-                        // 向下滑动
-                        guesture="down"
-                    } else if gesture.translation.height < -swipeThreshold {
-                        // 向上滑动
-                        guesture="up"
-                    }
-                    self.offset = .zero
-                }
-        )
-        .navigationBarHidden(true)
+        }
+
     }
     
     var headerView: some View {

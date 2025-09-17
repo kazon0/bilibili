@@ -12,8 +12,7 @@ import SwiftUI
 
        @State private var showToast = false
        @EnvironmentObject var videoViewModel: VideoViewModel
-       @State private var showFolderSelection = false
-       
+       @Binding var showFolderSelection :Bool
        @EnvironmentObject var viewModel: CollectionViewModel
 
         var body: some View {
@@ -186,9 +185,6 @@ import SwiftUI
                         Spacer()
                         Divider()
                     }
-//                    .sheet(isPresented: $showFolderSelection) {
-//                        CollectionFolderListViewForSelection(video: video, isPresented: $showFolderSelection)
-//                    }
                     .padding(.horizontal, 12)
                     .padding(.top, 12)
                     ConnectVideoView(username: "怀旧党", image: "roll1", title: "怎么说 咋搞 说的就是我", count1: "11.1万",count2: "55")
@@ -201,13 +197,13 @@ import SwiftUI
                             .offset(y:30)
                      
                     }
+ 
                 }
                 .transition(.asymmetric(
                     insertion: .move(edge: .bottom).combined(with: .opacity),
                     removal: .opacity
                 ))
                 .animation(.easeInOut(duration: 0.3), value: showToast)
-
             }
         }
     }
