@@ -28,7 +28,6 @@ struct ContentView: View {
                             MyPageView()
                         } else {
                             PersonView()
-                              
                         }
                     default: EmptyView()
                     }

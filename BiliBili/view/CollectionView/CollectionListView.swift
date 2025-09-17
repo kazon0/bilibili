@@ -31,6 +31,13 @@ struct CollectionListView: View {
                             LazyVGrid(columns: columns, spacing: 16){
                                 ForEach(viewModel.folders, id: \.objectID) { folder in
                                     FolderLinkView(folder: folder, showDetail: $showDetail)
+                                        .contextMenu {
+                                            Button(role: .destructive) {
+                                                viewModel.deleteFolder(folder)
+                                            } label: {
+                                                Label("删除", systemImage: "trash")
+                                            }
+                                        }
                                         .padding(.leading,-190)
                                 }
                             }
@@ -74,6 +81,7 @@ struct FolderLinkView: View {
     var body: some View {
         NavigationLink(destination:
         CollectionFolderDetailView(folder: folder, showDetail: $showDetail)
+            .navigationBarBackButtonHidden(true)
         ) {
             CollectionFolderView(folder: folder)
         }
@@ -208,46 +216,64 @@ struct CollectionAddView: View {
 
 struct CollectionFolderView: View {
     let folder: CollectionFolder   
-
+    @EnvironmentObject var videoViewModel: VideoViewModel
     var body: some View {
         
         HStack{
             // 封面图
-            if let coverData = folder.cover, let uiImage = UIImage(data: coverData) {
+            if let coverData = folder.cover,
+               let uiImage = UIImage(data: coverData) {
+                //有封面，直接显示
                 Image(uiImage: uiImage)
                     .resizable()
                     .scaledToFill()
                     .frame(width: 120, height: 80)
                     .clipped()
                     .cornerRadius(8)
-                    
-            } else {
-                // 默认封面
-                Rectangle()
-                    .fill(Color.gray.opacity(0.2))
+                    .padding(.leading, -80)
+
+            }
+            else if let firstVideoID = folder.videoIDsArray.first,
+                    let firstVideo = videoViewModel.videos.first(where: { $0.id == firstVideoID }),
+                    let url = URL(string: firstVideo.thumbPhoto) {
+                //没封面，有视频，显示第一个视频封面
+                AsyncImage(url: url) { image in
+                    image.resizable()
+                        .scaledToFill()
+                } placeholder: {
+                    Color.gray
+                }
+                .frame(width: 120, height: 80)
+                .cornerRadius(8)
+                .padding(.leading, -80)
+            }
+            else {
+                //没封面，没视频，默认封面
+                Color.gray
+                    .opacity(0.1)
                     .frame(width: 120, height: 80)
-                    .overlay(
-                        Image(systemName: "folder.fill")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 30, height: 30)
-                            .foregroundColor(.gray)
-                    )
                     .cornerRadius(8)
-                    .padding(.leading,-80)
+                    .padding(.leading, -80)
             }
             VStack(alignment: .leading, spacing: 30) {
                 Text(folder.name ?? "未命名")
                     .font(.headline)
                     .lineLimit(1)
-                
-
                 Text("\(folder.videoIDsArray.count) 个内容")
                     .font(.subheadline)
                     .foregroundColor(.gray)
             }
             .frame(width: 120, alignment: .leading)
-            .offset(y:-3)
+            .offset(x:3,y:-3)
+        }
+        .onAppear {//首个视频封面数据
+            if let firstVideoID = folder.videoIDsArray.first {
+                if let firstVideo = videoViewModel.videos.first(where: { $0.id == firstVideoID }) {
+                    print("[Debug] 找到视频:", firstVideo.title)
+                } else {
+                    print("[Debug] 没找到匹配视频")
+                }
+            }
         }
         .frame(width: 360,height: 100)
         .background(Color.white)

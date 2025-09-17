@@ -69,9 +69,9 @@ struct PersonView: View {
                 Text("你确定要退出登录吗？")
             }
         }
-        .onAppear {
-            print("用户 token:", userToken)
-        }
+//        .onAppear {
+//            print("用户 token:", userToken)
+//        }
     }
 }
 

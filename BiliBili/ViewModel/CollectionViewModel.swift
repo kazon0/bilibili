@@ -10,41 +10,39 @@ import SwiftUI
 import CoreData
 
 extension CollectionFolder {
-    /// 方便获取 videoIDs 的数组形式
+    //方便获取 videoIDs 的数组形式
     var videoIDsArray: [String] {
         get {
             let arr = videoIDs as? [String] ?? []
-            print("[Debug] 获取 videoIDsArray for folder '\(name ?? "未命名")': \(arr)")
+            //print("[Debug] 获取 videoIDsArray for folder '\(name ?? "未命名")': \(arr)")
             return arr
         }
         set {
-            print("[Debug] 设置 videoIDsArray for folder '\(name ?? "未命名")': \(newValue)")
+            //print("[Debug] 设置 videoIDsArray for folder '\(name ?? "未命名")': \(newValue)")
             videoIDs = newValue as NSObject
         }
     }
     
-    /// 检查是否包含某个 videoID
+    //检查是否包含某个 videoID
     func contains(videoID: String) -> Bool {
         let contains = videoIDsArray.contains(videoID)
         print("[Debug] folder '\(name ?? "未命名")' contains \(videoID)? -> \(contains)")
         return contains
     }
     
-    /// 添加 videoID，如果已经存在则不重复
+    //添加 videoID，如果已经存在则不重复
     @discardableResult
     func addVideoID(_ id: String) -> Bool {
         let currentIDs = videoIDsArray
         guard !currentIDs.contains(id) else {
-            print("[Debug] videoID '\(id)' 已存在于 folder '\(name ?? "未命名")'")
             return false
         }
         let newIDs = currentIDs + [id]
         videoIDs = newIDs as NSObject
-        print("[Debug] 添加 videoID '\(id)' 到 folder '\(name ?? "未命名")', 当前列表: \(newIDs)")
         return true
     }
 
-    /// 移除 videoID，如果存在则删除
+    //移除 videoID，如果存在则删除
     @discardableResult
     func removeVideoID(_ id: String) -> Bool {
         var ids = videoIDsArray
@@ -60,9 +58,9 @@ extension CollectionFolder {
 }
 
 extension CollectionViewModel {
-    /// 获取唯一的默认收藏夹
+    //获取唯一的默认收藏夹
     func defaultFolder() -> CollectionFolder {
-        // 直接用 fetch 保证数据库层面唯一性
+        //直接用fetch保证数据库层面唯一性
         let request: NSFetchRequest<CollectionFolder> = CollectionFolder.fetchRequest()
         request.predicate = NSPredicate(format: "name == %@", "默认收藏夹")
         
@@ -72,7 +70,7 @@ extension CollectionViewModel {
                 print("[Debug] 找到已有默认收藏夹")
                 return folder
             } else {
-                // 没有则新建
+                //没有则新建
                 let folder = CollectionFolder(context: context)
                 folder.name = "默认收藏夹"
                 folder.desc = "系统默认收藏夹"
@@ -83,7 +81,6 @@ extension CollectionViewModel {
             }
         } catch {
             print("[Error] 获取默认收藏夹失败: \(error)")
-            // 兜底再建一个
             let folder = CollectionFolder(context: context)
             folder.name = "默认收藏夹"
             folder.desc = "系统默认收藏夹"
@@ -119,21 +116,18 @@ class CollectionViewModel: ObservableObject {
 
     @Published var folders: [CollectionFolder] = []
 
-    // 获取所有收藏夹
+    //获取所有收藏夹
     func fetchFolders() {
         let request: NSFetchRequest<CollectionFolder> = CollectionFolder.fetchRequest()
         do {
             folders = try context.fetch(request)
             print("[Debug] fetchFolders -> 获取 \(folders.count) 个收藏夹")
-            for folder in folders {
-                print("  - \(folder.name ?? "未命名"): \(folder.videoIDsArray)")
-            }
         } catch {
             print("[Error] fetchFolders error: \(error)")
         }
     }
 
-    // 创建新收藏夹
+    //创建新收藏夹
     func createFolder(name: String, cover: Data?, desc: String?, isPublic: Bool) {
         let folder = CollectionFolder(context: context)
         folder.name = name
@@ -145,15 +139,15 @@ class CollectionViewModel: ObservableObject {
         fetchFolders()
     }
     
-    /// 删除指定收藏夹
+    //删除指定收藏夹
     func deleteFolder(_ folder: CollectionFolder) {
-        context.delete(folder)        // 删除 Core Data 对象
-        save()                        // 保存上下文
-        fetchFolders()                // 刷新 folders 数组
+        context.delete(folder)        //删除CoreData对象
+        save()                        //保存上下文
+        fetchFolders()                //刷新folders数组
         print("[Debug] 已删除收藏夹 '\(folder.name ?? "未命名")'")
     }
 
-    // 添加 videoID
+    //添加videoID
     func addVideoID(_ id: String, to folder: CollectionFolder) {
         let added = folder.addVideoID(id)
         if added {
@@ -164,7 +158,7 @@ class CollectionViewModel: ObservableObject {
         }
     }
 
-    // 移除 videoID
+    //移除videoID
     func removeVideoID(_ id: String, from folder: CollectionFolder) {
         let removed = folder.removeVideoID(id)
         if removed {
@@ -175,20 +169,19 @@ class CollectionViewModel: ObservableObject {
         }
     }
 
-    // 添加视频对象到收藏夹
+    //添加视频对象到收藏夹
     func add(video: Videos, to folder: CollectionFolder) {
         let added = folder.addVideoID(video.id)
         if added {
             print("[Debug] 视频 '\(video.title)' 已加入收藏夹 '\(folder.name ?? "未命名")'")
             save()
             context.refresh(folder, mergeChanges: true)
-            print("[Debug] 当前收藏夹视频列表：", folder.videoIDsArray)
         } else {
             print("[Debug] 视频 '\(video.title)' 已经在收藏夹 '\(folder.name ?? "未命名")' 中")
         }
     }
 
-    // 保存上下文
+    //保存上下文
     func save() {
         do {
             try context.save()

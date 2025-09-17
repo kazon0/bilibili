@@ -16,13 +16,13 @@ class VideoViewModel: ObservableObject {
     @AppStorage("userToken") private var userToken: String = ""
     
     
-    // 获取视频列表
+    //获取视频列表
     func fetchVideos(page: Int = 0, pageSize: Int = 8) {
         
-        // 如果已经有数据了，就不再重新加载
+        //如果已经有数据了，就不再重新加载
         guard videos.isEmpty else { return }
 
-        // token 为空表示未登录
+        //token为空表示未登录
         let tokenToUse = userToken.isEmpty ? nil : userToken
         
         var canLike: Bool {

@@ -61,11 +61,12 @@ struct SelectThumbPhoto: View {
         // 弹出 UIImagePickerController
         .sheet(isPresented: $showImagePicker) {
             ImagePicker(image: $uiImage, sourceType: pickerSource)
-                .onChange(of: uiImage) { image in
-                    if let image = image {
-                        thumbPhoto = image.jpegData(compressionQuality: 0.8)
-                    }
-                }
+        }
+        .onChange(of: uiImage) { image in
+            if let image = image {
+                thumbPhoto = image.jpegData(compressionQuality: 0.8)
+                print("[Debug] 保存 cover 长度: \(thumbPhoto?.count ?? 0) bytes")
+            }
         }
     }
 }

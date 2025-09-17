@@ -33,7 +33,7 @@ class LoginViewModel: ObservableObject {
                     self.token = token
                     self.userToken = token   // 自动存储全局 token
                     self.errorMessage = nil
-                    print("登录成功，token:", token)
+                    //print("登录成功，token:", token)
                 case .failure(let error):
                     self.errorMessage = error.localizedDescription
                     print("登录失败:", error.localizedDescription)
