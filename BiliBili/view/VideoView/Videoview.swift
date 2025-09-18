@@ -21,7 +21,7 @@ struct VideoPlayerView: View {
     let choosetitle = ["简介", "评论"]
     @State var selectionTitle :String = "简介"
     // 定义单列布局
-    let columns = [GridItem(.flexible())]  // 只有一列，宽度灵活填充
+    let columns = [GridItem(.flexible())]
     @State private var offset = CGSize.zero
     @State var guesture :String = ""
     @State private var showFolderSelection = false
@@ -53,17 +53,11 @@ struct VideoPlayerView: View {
                                         }
                                     }
                                 }
-                                // 返回按钮
-                                Button(action: {
-                                    dismiss()
-                                }) {
-                                    Image(systemName: "chevron.left")
-                                        .foregroundColor(Color(#colorLiteral(red: 0.7345525622, green: 0.7345526218, blue: 0.7345525622, alpha: 1)))
-                                }
-                                .padding()
+                                
                                 
                             }
-                            ProgressbarView(playerWrapper: playerWrapper)}}
+                           // ProgressbarView(playerWrapper: playerWrapper)
+                        }}
                         LazyVGrid(columns: columns, pinnedViews: [.sectionHeaders]) {
                             Section(header : headerView) {
                                 if selectionTitle == "评论"{
@@ -106,7 +100,6 @@ struct VideoPlayerView: View {
                     Rectangle()
                         .foregroundColor(.black)
                         .opacity(dragOffset.height > 0 ? 0 : 0.3)
-                        .animation(.easeOut, value: dragOffset.height)
 
                 CollectionListSelectionView(showFolderSelection: $showFolderSelection, video: $video)
                         .offset(y:250)
@@ -213,7 +206,7 @@ struct VideoPlayerView: View {
             .padding(.horizontal,nil)
             .padding(.vertical,7)
             Divider()
-                .offset(y: -8) // 向上移动8pt，与按钮文字padding一致
+                .offset(y: -8) 
         }
         .background(Color.white)
     }

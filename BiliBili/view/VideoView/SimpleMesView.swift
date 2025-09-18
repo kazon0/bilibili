@@ -156,16 +156,20 @@ import SwiftUI
                                         let folder = viewModel.defaultFolder()
                                         viewModel.add(video: video, to: folder)
                                         showToast = true
+                                        showCancle = false
                                         //viewmodel.cleanupDuplicateDefaultFolders()
-                                        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                                        let delay: DispatchTime = showCancle ? .now() : .now() + 5
+                                        DispatchQueue.main.asyncAfter(deadline: delay) {
                                             showToast = false
                                         }
                                     }
                                     else{
                                         print("已取消默认收藏")
                                         showCancle = true
+                                        showToast = false
                                         viewModel.removeVideoFromAllFolders(video)
-                                        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                                        let delay: DispatchTime = showToast ? .now() : .now() + 5
+                                        DispatchQueue.main.asyncAfter(deadline: delay) {
                                             showCancle = false
                                         }
                                     }

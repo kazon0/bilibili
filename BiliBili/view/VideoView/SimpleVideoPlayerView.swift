@@ -20,18 +20,54 @@ class PlayerWrapper: ObservableObject {
 struct SimpleVideoPlayerView: View {
     @ObservedObject var playerWrapper: PlayerWrapper
     let videoURL: URL
+    @Environment(\.dismiss) private var dismiss
 
     @State private var observationStatus: NSKeyValueObservation?
     @State private var timeObserverToken: Any?
+    @State private var showControls: Bool = false
 
     var body: some View {
         ZStack {
+            // 视频区域
             if let player = playerWrapper.player {
                 VideoPlayer(player: player)
+                    .onTapGesture {
+                        // 点击切换控制条显示
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            showControls.toggle()
+                        }
+                    }
                     .onDisappear {
                         player.pause()
                         removeObservers()
                     }
+            }
+
+            // 控制层
+            if showControls {
+                VStack {
+                    // 顶部返回键
+                    HStack {
+                        Button(action: { dismiss() }) {
+                            Image(systemName: "chevron.left")
+                                .foregroundColor(.white)
+                                .font(.system(size: 20, weight: .bold))
+                                .padding()
+                                .background(Color.black.opacity(0.4))
+                                .clipShape(Circle())
+                        }
+                        Spacer()
+                    }
+                    .padding(.top, 40)
+                    .padding(.horizontal, 16)
+
+                    Spacer()
+
+                    // 底部进度条
+                    ProgressbarView(playerWrapper: playerWrapper)
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                        .padding(.bottom, 8)
+                }
             }
         }
         .frame(height: UIScreen.main.bounds.width * 9 / 16)
@@ -81,8 +117,9 @@ struct SimpleVideoPlayerView: View {
     }
 }
 
-
+//自定义进度条
 struct ProgressbarView: View {
+    @Environment(\.dismiss) private var dismiss
     @ObservedObject var playerWrapper: PlayerWrapper
 
     @State private var isDragging = false
@@ -105,6 +142,7 @@ struct ProgressbarView: View {
 
     var body: some View {
         HStack {
+
             Image(systemName: "play.fill")
                 .foregroundColor(.white)
                 .font(.system(size: 20))

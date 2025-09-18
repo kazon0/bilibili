@@ -86,9 +86,8 @@ struct CollectionListSelectionView: View {
                                 }
                             }
                         }
-                        withAnimation {
                             showFolderSelection = false
-                        }
+                        
                     }){
                         Text("完成")
                             .foregroundColor(.black)
