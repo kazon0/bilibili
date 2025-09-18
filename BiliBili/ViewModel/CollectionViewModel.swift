@@ -30,6 +30,7 @@ extension CollectionFolder {
         return contains
     }
     
+
     //添加 videoID，如果已经存在则不重复
     @discardableResult
     func addVideoID(_ id: String) -> Bool {
@@ -72,6 +73,7 @@ extension CollectionViewModel {
             } else {
                 //没有则新建
                 let folder = CollectionFolder(context: context)
+                folder.id = UUID()
                 folder.name = "默认收藏夹"
                 folder.desc = "系统默认收藏夹"
                 folder.isPublic = false
@@ -82,6 +84,7 @@ extension CollectionViewModel {
         } catch {
             print("[Error] 获取默认收藏夹失败: \(error)")
             let folder = CollectionFolder(context: context)
+            folder.id = UUID()
             folder.name = "默认收藏夹"
             folder.desc = "系统默认收藏夹"
             folder.isPublic = false
@@ -130,6 +133,7 @@ class CollectionViewModel: ObservableObject {
     //创建新收藏夹
     func createFolder(name: String, cover: Data?, desc: String?, isPublic: Bool) {
         let folder = CollectionFolder(context: context)
+        folder.id = UUID()
         folder.name = name
         folder.cover = cover
         folder.desc = desc
@@ -168,7 +172,27 @@ class CollectionViewModel: ObservableObject {
             print("[Debug] removeVideoID 不存在: \(id) -> \(folder.name ?? "未命名")")
         }
     }
-
+    
+    //判断视频收藏状态
+    func isVideoFavorited(_ video: Videos) -> Bool {
+        for folder in folders {
+            if folder.contains(videoID: video.id) {
+                return true
+            }
+        }
+        return false
+    }
+    
+    /// 取消视频在所有收藏夹中的收藏
+    func removeVideoFromAllFolders(_ video: Videos) {
+        for folder in folders {
+            if folder.contains(videoID: video.id) {
+                removeVideoID(video.id, from: folder)
+            }
+        }
+        print("[Debug] 已取消视频 '\(video.title)' 在所有收藏夹的收藏")
+    }
+    
     //添加视频对象到收藏夹
     func add(video: Videos, to folder: CollectionFolder) {
         let added = folder.addVideoID(video.id)

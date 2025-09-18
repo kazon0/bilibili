@@ -11,9 +11,11 @@ import SwiftUI
        @Binding var video: Videos
 
        @State private var showToast = false
+       @Binding var showCancle :Bool
        @EnvironmentObject var videoViewModel: VideoViewModel
        @Binding var showFolderSelection :Bool
        @EnvironmentObject var viewModel: CollectionViewModel
+       
 
         var body: some View {
             // UP主信息区域
@@ -149,24 +151,33 @@ import SwiftUI
                             
                             VStack(spacing: 4) {
                                 Button(action: {
-                                    // 调用 ViewModel 方法获取默认收藏夹
-                                    let folder = viewModel.defaultFolder()
-                                    viewModel.add(video: video, to: folder)
-                                    showToast = true
-                                    //viewmodel.cleanupDuplicateDefaultFolders()
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                                        showToast = false
+                                    if viewModel.isVideoFavorited(video) == false{
+                                        // 调用 ViewModel 方法获取默认收藏夹
+                                        let folder = viewModel.defaultFolder()
+                                        viewModel.add(video: video, to: folder)
+                                        showToast = true
+                                        //viewmodel.cleanupDuplicateDefaultFolders()
+                                        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                                            showToast = false
+                                        }
+                                    }
+                                    else{
+                                        print("已取消默认收藏")
+                                        showCancle = true
+                                        viewModel.removeVideoFromAllFolders(video)
+                                        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                                            showCancle = false
+                                        }
                                     }
                                 }) {
-                                    Image(systemName: video.isCollect ? "star.fill" : "star")
+                                    Image(systemName:viewModel.isVideoFavorited(video) ? "star.fill" : "star")
                                         .font(.system(size: 22))
-                                        .foregroundColor(video.isCollect ? Color(#colorLiteral(red: 1, green: 0.35, blue: 0.68, alpha: 1)) : .gray)
+                                        .foregroundColor(viewModel.isVideoFavorited(video) ? Color(#colorLiteral(red: 1, green: 0.35, blue: 0.68, alpha: 1)) : .gray)
                                 }
                                 Text("\(video.isCollectCount)")
                                     .font(.system(size: 12))
                                     .foregroundColor(.gray)
                             }
-                            
                             
                             VStack(spacing: 4) {
                                 Button(action: {
@@ -197,13 +208,15 @@ import SwiftUI
                             .offset(y:30)
                      
                     }
- 
                 }
                 .transition(.asymmetric(
                     insertion: .move(edge: .bottom).combined(with: .opacity),
                     removal: .opacity
                 ))
                 .animation(.easeInOut(duration: 0.3), value: showToast)
+            }
+            .onAppear{
+                viewModel.fetchFolders()
             }
         }
     }
