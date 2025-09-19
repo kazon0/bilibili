@@ -215,7 +215,8 @@ struct CollectionAddView: View {
 }
 
 struct CollectionFolderView: View {
-    let folder: CollectionFolder   
+    let folder: CollectionFolder
+    @EnvironmentObject var viewModel: CollectionViewModel
     @EnvironmentObject var videoViewModel: VideoViewModel
     var body: some View {
         
@@ -267,6 +268,7 @@ struct CollectionFolderView: View {
             .offset(x:3,y:-3)
         }
         .onAppear {//首个视频封面数据
+            viewModel.fetchFolders()
             if let firstVideoID = folder.videoIDsArray.first {
                 if let firstVideo = videoViewModel.videos.first(where: { $0.id == firstVideoID }) {
                     print("[Debug] 找到视频:", firstVideo.title)
@@ -274,6 +276,7 @@ struct CollectionFolderView: View {
                     print("[Debug] 没找到匹配视频")
                 }
             }
+            
         }
         .frame(width: 360,height: 100)
         .background(Color.white)

@@ -132,6 +132,33 @@ struct VideoPlayerView: View {
                         .background(Color.black)
                         .cornerRadius(10)
             }
+            if guesture != "up"{
+                VStack{
+                    ZStack{
+                        Rectangle()
+                            .fill(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [Color.black.opacity(0.5), Color.black.opacity(0)]),
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                )
+                            )
+                            .frame(maxWidth: .infinity, maxHeight: 50)
+                        HStack{
+                            Button(action:{
+                                dismiss()
+                            }){
+                                Image(systemName: "chevron.left")
+                                    .foregroundColor(.white)
+                                    .font(.title2)
+                            }
+                            .padding(.leading,10)
+                            Spacer()
+                        }
+                    }
+                    Spacer()
+                }
+            }
         }
         .onAppear{
             showVideoView = true
