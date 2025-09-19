@@ -15,7 +15,7 @@ struct VideoPlayerView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var tabBarManager: TabBarManager
     @Binding var video: Videos
-    
+    @Binding var showVideoView: Bool
     @EnvironmentObject var viewModel: CollectionViewModel
 
     let choosetitle = ["简介", "评论"]
@@ -132,6 +132,9 @@ struct VideoPlayerView: View {
                         .background(Color.black)
                         .cornerRadius(10)
             }
+        }
+        .onAppear{
+            showVideoView = true
         }
         .animation(.easeInOut(duration: 0.3), value: showCancle)
     }

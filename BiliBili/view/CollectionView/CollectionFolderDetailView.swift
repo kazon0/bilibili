@@ -148,7 +148,7 @@ struct CollectionFolderDetailView: View {
 
     // 播放页
     func videoPlayer(for video: Videos) -> some View {
-        VideoPlayerView(video: .constant(video))
+        VideoPlayerView(video: .constant(video), showVideoView: .constant(false))
             .environmentObject(viewModel)
             .environmentObject(videoViewModel)
             .environmentObject(tabBarManager)

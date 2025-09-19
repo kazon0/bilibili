@@ -11,9 +11,9 @@ struct FirstView: View {
     @State var columns: [GridItem] = [GridItem(.flexible())]
     @State var columns2: [GridItem] = [GridItem(.flexible()), GridItem(.flexible())]
     @State private var showSearchView = false
-    @State private var showVideoView = false
     @State private var selectedVideo: Videos? = nil
     @State private var navigateToVideo = false // 控制跳转
+    @State private var showVideoView = false
     
     @EnvironmentObject var tabBarManager: TabBarManager
    
@@ -28,8 +28,7 @@ struct FirstView: View {
                     columns: $columns,
                     columns2: $columns2,
                     navigateToVideo: $navigateToVideo,
-                    showSearchView: $showSearchView,
-                    showVideoView: $showVideoView
+                    showSearchView: $showSearchView
                 )
             }
             .overlay(
@@ -43,14 +42,21 @@ struct FirstView: View {
             
             // 跳转到搜索页
             .navigationDestination(isPresented: $showSearchView) {
-                Searchview()
-                    .onAppear { tabBarManager.isHidden = true }
-                    .onDisappear { tabBarManager.isHidden = false }
+                Searchview(showVideoView: $showVideoView)
+                    .onAppear {
+                        tabBarManager.isHidden = true
+                        showVideoView = false
+                    }
+                    .onDisappear {
+                        if !showVideoView{
+                            tabBarManager.isHidden = false
+                        }
+                    }
                     .navigationBarBackButtonHidden(true)
             }
             .navigationDestination(isPresented: $navigateToVideo) {
                     if let video = selectedVideo {
-                        VideoPlayerView(video: .constant(video))
+                        VideoPlayerView(video: .constant(video), showVideoView: $showVideoView)
                             .onAppear { tabBarManager.isHidden = true }
                             .onDisappear { tabBarManager.isHidden = false }
                             .navigationBarBackButtonHidden(true)
@@ -82,7 +88,6 @@ struct Showscroll: View {
     
     // 进入视频页面相关状态
     @State private var isVideoing = false
-    @Binding var showVideoView: Bool
     
     //登录状态
     @AppStorage("userToken") private var userToken: String = ""
@@ -153,6 +158,7 @@ struct Showscroll: View {
             FirstView()
                 .environmentObject(CollectionViewModel())
                 .environmentObject(VideoViewModel())
+                .environmentObject(TabBarManager())
         }
     }
     

@@ -13,6 +13,7 @@ struct Searchview: View {
     @Environment(\.dismiss) private var dismiss
     @State private var searchText = ""
     @State private var isSearching = false
+    @Binding var showVideoView: Bool
     @State private var allVideos: [Videos] = []
     @State private var searchResults: [Videos] = []
 
@@ -37,7 +38,7 @@ struct Searchview: View {
             ScrollView(.vertical, showsIndicators: false) {
                 SearchResultsView(searchText: searchText,
                                   isSearching: isSearching,
-                                  searchResults: searchResults)
+                                  searchResults: searchResults, showVideoView: $showVideoView)
             }
         }
         .onAppear {
@@ -134,6 +135,7 @@ struct SearchResultsView: View {
     let searchText: String
     let isSearching: Bool
     let searchResults: [Videos]
+    @Binding var showVideoView: Bool
 
     var body: some View {
         if !searchText.isEmpty || isSearching {
@@ -144,17 +146,11 @@ struct SearchResultsView: View {
             } else {
                 LazyVStack(spacing: 12) {
                     ForEach(searchResults) { video in
-                        VStack(alignment: .leading) {
-                            Text(video.title)
-                                .font(.headline)
-                            Text(video.upData.name)
-                                .font(.subheadline)
-                                .foregroundColor(.gray)
-                        }
-                        .padding()
-                        .background(Color.white)
-                        .cornerRadius(8)
-                        .shadow(radius: 1)
+                        videoRow(video: video)
+                        Divider()
+                            .frame(height: 0.08)
+                            .background(Color.gray.opacity(0.05))
+                            .padding(.leading)
                     }
                 }
                 .padding(.top)
@@ -166,15 +162,79 @@ struct SearchResultsView: View {
                 .frame(width: 400, height: 600)
         }
     }
+    
+    @ViewBuilder
+    func videoRow(video: Videos) -> some View {
+        NavigationLink(destination: videoPlayer(for: video)) {
+            HStack(spacing: 16) {
+                thumbnailImage(for: video)
+                VStack(alignment: .leading){
+                    Text(video.title)
+                        .foregroundColor(.black)
+                        .lineLimit(2)
+                        .multilineTextAlignment(.leading)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.vertical, 8)
+                    Spacer()
+                    VStack(alignment: .leading){
+                        HStack(spacing: 3){
+                            Image("up")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 20)
+                            Text(video.upData.name)
+                                .font(.caption)
+                                .foregroundColor(.gray)
+                        }
+                        HStack(spacing: 5){
+                            Image(systemName: "play.rectangle")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 15)
+                                .foregroundColor(.gray)
+                                .padding(.leading,3)
+                            Text("\(video.upData.videoCount)")
+                                .font(.caption)
+                                .foregroundColor(.gray)
+                        }
+                    }
+                }
+            }
+            .padding(.vertical,8)
+            .padding(.horizontal)
+            .background(Color.white)
+        }
+    }
+    
+    // 拆出图片加载
+    @ViewBuilder
+    func thumbnailImage(for video: Videos) -> some View {
+        if let url = URL(string: video.thumbPhoto) {
+            AsyncImage(url: url) { image in
+                image.resizable()
+                    .scaledToFill()
+            } placeholder: {
+                Color.gray
+            }
+            .frame(width: 160, height: 90)
+            .cornerRadius(6)
+        }
+    }
+
+    // 播放页
+    func videoPlayer(for video: Videos) -> some View {
+        VideoPlayerView(video: .constant(video), showVideoView: $showVideoView)
+    }
 }
 
 
 struct Searchview_Previews: PreviewProvider {
+    
     static var previews: some View {
         struct PreviewWrapper: View {
             
             var body: some View {
-                Searchview()
+                Searchview(showVideoView: .constant(false))
                     .environmentObject(VideoViewModel())
             }
         }
